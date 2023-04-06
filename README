@@ -1,0 +1,8 @@
+Reconstruct is my final university project. 
+
+Please note that this does NOT include any JUCE distribution.
+
+It should be built using CMake.
+
+The batch files can be used for building and launching quickly but I would recommend using VSCode's CMake Tools extension or similar.
+
