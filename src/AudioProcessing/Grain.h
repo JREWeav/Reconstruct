@@ -28,6 +28,7 @@ public:
 
     // Getters
     float getGrainLengthInMs();
+    float getGrainPitch();
     int getGrainPlaybackPosition();
 
     AudioSampleBuffer *getGrainBuffer();

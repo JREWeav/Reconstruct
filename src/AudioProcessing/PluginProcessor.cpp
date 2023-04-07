@@ -132,8 +132,6 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, j
             // Get the MIDI note number and velocity
             int midiNoteNumber = metadata.getMessage().getNoteNumber();
             float velocity = metadata.getMessage().getVelocity() / 127.0f;
-
-            DBG("NOT! MIDI Note: " + String(midiNoteNumber) + " Velocity: " + String(velocity));
         }
     }
 

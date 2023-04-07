@@ -29,9 +29,7 @@ Grain::~Grain()
 void Grain::initGrain(AudioSampleBuffer *sample)
 {
     const int numChannels = sample->getNumChannels();
-    DBG("SAMPLE Num channels: " + String(numChannels));
     const int numSamples = sample->getNumSamples();
-    DBG("SAMPLE Num samples: " + String(numSamples));
 
     int grainLengthInSamples = (grainLength / grainSampleRate) * numSamples;
     int startSample = grainStartPosition * numSamples;
@@ -39,10 +37,8 @@ void Grain::initGrain(AudioSampleBuffer *sample)
 
     int sampleLength = endSample - startSample;
     sampleLength = jmin(sampleLength, numSamples);
-    DBG("GRAIN Num samples: " + String(sampleLength));
 
     grainBuffer = new AudioSampleBuffer(numChannels, sampleLength);
-    DBG("GRAIN BUFFER Num channels: " + String(grainBuffer->getNumChannels()));
 
     for (int channel = 0; channel < numChannels; ++channel)
     {
@@ -140,6 +136,11 @@ void Grain::setGrainPlaybackPosition(int position)
 int Grain::getGrainPlaybackPosition()
 {
     return grainPlaybackPosition;
+}
+
+float Grain::getGrainPitch()
+{
+    return grainPitch;
 }
 
 AudioSampleBuffer *Grain::getGrainBuffer()

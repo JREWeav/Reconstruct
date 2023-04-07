@@ -4,7 +4,7 @@
 
 /*
 TODO:
-- Make all parameters controlable by the GUI
+- Make all parameters controllable by the GUI
 */
 
 GranularEngine::GranularEngine(juce::AudioFormatManager &formatManager)
@@ -25,7 +25,7 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity)
     Grain *grain = new Grain();
     grain->setGrainPitch(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber));
     grain->setGrainStartPosition(0.2);
-    grain->setGrainLengthInMs(200);
+    grain->setGrainLengthInMs(2000);
     grain->setGrainPan(0.5);
     grain->setGrainVolume(0.5);
     grainPool.push_back(grain);
@@ -68,8 +68,6 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
             int midiNoteNumber = message.getNoteNumber();
             float velocity = message.getVelocity() / 127.0f;
 
-            DBG("ENGINE! MIDI Note: " + String(midiNoteNumber) + " Velocity: " + String(velocity));
-
             // Generate a new grain
             generateGrain(midiNoteNumber, velocity);
         }
@@ -104,7 +102,12 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
         if (grain->getGrainPlaybackPosition() == 0)
         {
             grain->setGrainSampleRate(storedSampleRate);
-            grain->initGrain(sampleBuffer);
+            AudioSampleBuffer *changedSampleBuffer = new AudioSampleBuffer(sampleBuffer->getNumChannels(), sampleBuffer->getNumSamples());
+            changedSampleBuffer->makeCopyOf(*sampleBuffer);
+            float grainPitchShiftRatio = grain->getGrainPitch() / 261.62f;
+            PitchShifter pitchShifter{9, grainPitchShiftRatio};
+            pitchShifter.process(*changedSampleBuffer);
+            grain->initGrain(changedSampleBuffer);
         }
 
         int grainNumSamples = grain->getGrainBuffer()->getNumSamples();

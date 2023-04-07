@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "Grain.h"
+#include "../DSP/PitchShifter.h"
 
 class GranularEngine : public juce::AudioProcessor
 {
