@@ -1,6 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "../DSP/PitchShifter.h"
 
 class Grain
 {
@@ -11,8 +12,8 @@ public:
     void setGrainLengthInMs(float length);
     void setGrainStartPosition(float position);
     void setGrainVolume(float volume);
-    void setGrainSpeed(float speed);
     void setGrainPitch(float pitch);
+    void setGrainSpeed(float speed);
     void setGrainSampleRate(float sampleRate);
     void setGrainLoop(bool loop);
     void setGrainReverse(bool reverse);

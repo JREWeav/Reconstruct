@@ -2,6 +2,11 @@
 
 //==============================================================================
 
+/*
+TODO:
+- Make all parameters controlable by the GUI
+*/
+
 GranularEngine::GranularEngine(juce::AudioFormatManager &formatManager)
     : AudioProcessor(BusesProperties()), formatManager(formatManager)
 {

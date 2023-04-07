@@ -1,5 +1,12 @@
 #include "AudioWaveform.h"
 
+/*
+TODO:
+- Make the waveform control grain start and end points
+- Add grains to the waveform
+- Remove the playhead or move it to the start of the grain
+*/
+
 //==============================================================================
 AudioWaveform::AudioWaveform(AudioFormatManager &formatManagerToUse, AudioThumbnailCache &cacheToUse) : audioThumb(10000, formatManagerToUse, cacheToUse)
 {

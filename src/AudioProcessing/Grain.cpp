@@ -1,5 +1,16 @@
 #include "Grain.h"
 
+/*
+TODO:
+- Make the waveform control grain start and end points
+- Control pitch and speed of the grain
+- Add Panning
+- Add randomisation to all parameters
+- Add looping
+- Add AMP envelopes (Start with ADSR)
+- Add reverse?
+*/
+
 Grain::Grain()
 {
     // In your constructor, you should add any child components, and

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PluginProcessor.h"
+#include "../AudioProcessing/PluginProcessor.h"
 #include <JuceHeader.h>
 #include "MainGUI.h"
 

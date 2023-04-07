@@ -30,13 +30,16 @@ juce_generate_juce_header(${TargetName})
 
 target_sources(${TargetName}
     PRIVATE
-        ./src/AudioWaveform.cpp
-        ./src/LoadingComponent.cpp
-        ./src/MainGUI.cpp
-        ./src/PluginEditor.cpp
-        ./src/PluginProcessor.cpp
-        ./src/Grain.cpp
-        ./src/GranularEngine.cpp
+        ./src/DSP/PitchShifter.cpp
+
+        ./src/AudioProcessing/Grain.cpp
+        ./src/AudioProcessing/GranularEngine.cpp
+        ./src/AudioProcessing/PluginProcessor.cpp
+
+        ./src/GUI/AudioWaveform.cpp
+        ./src/GUI/LoadingComponent.cpp
+        ./src/GUI/MainGUI.cpp
+        ./src/GUI/PluginEditor.cpp
         )
 
 target_compile_definitions(${TargetName}

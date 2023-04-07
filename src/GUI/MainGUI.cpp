@@ -1,5 +1,13 @@
 #include "MainGUI.h"
-#include "PluginProcessor.h"
+
+/*
+TODO:
+- Hook up the keyboard component to the synth
+- Add a slider to control the volume of the synth
+- Add a slider to control the pitch of the grains
+- Add a slider to control the speed of the grains
+- Add a slider to control the length of the grains
+*/
 
 MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, AudioPluginAudioProcessor &p) : loadComponent{formatManager, thumbnailCache, p}
 {

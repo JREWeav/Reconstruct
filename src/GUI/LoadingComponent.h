@@ -2,7 +2,7 @@
 
 #include <JuceHeader.h>
 #include "AudioWaveform.h"
-#include "PluginProcessor.h"
+#include "../AudioProcessing/PluginProcessor.h"
 
 class LoadingComponent : public juce::Component,
                          public juce::Button::Listener

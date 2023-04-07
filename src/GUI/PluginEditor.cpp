@@ -1,4 +1,4 @@
-#include "PluginProcessor.h"
+#include "../AudioProcessing/PluginProcessor.h"
 #include "PluginEditor.h"
 
 //==============================================================================
