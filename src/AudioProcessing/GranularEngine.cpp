@@ -35,19 +35,12 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity)
 
 void GranularEngine::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
-    for (int i = 0; i < grainPool.size(); i++)
-    {
-        grainPool[i]->setGrainSampleRate(sampleRate);
-    }
     storedSampleRate = sampleRate;
 }
 
 void GranularEngine::releaseResources()
 {
-    // When playback stops, you can use this as an opportunity to free up any
-    // spare memory, etc.
+    grainPool.clear();
 }
 
 void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMessages)
@@ -55,6 +48,7 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
     // Your audio-processing code goes here!
     // For more details, see the help for AudioProcessor::processBlock()
     const int numSamples = buffer.getNumSamples();
+    const int numChannels = buffer.getNumChannels();
     float timePassed = round(((float)numSamples / storedSampleRate) * 1000);
 
     for (const MidiMessageMetadata metadata : midiMessages)
@@ -99,39 +93,18 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
         Grain *grain = grainPool[i];
 
         // Generate the grain's waveform
-        if (grain->getGrainPlaybackPosition() == 0)
+        if (grain->getGrainPlaybackPositionInSamples() == 0)
         {
             grain->setGrainSampleRate(storedSampleRate);
-            AudioSampleBuffer *changedSampleBuffer = new AudioSampleBuffer(sampleBuffer->getNumChannels(), sampleBuffer->getNumSamples());
-            changedSampleBuffer->makeCopyOf(*sampleBuffer);
-            float grainPitchShiftRatio = grain->getGrainPitch() / 261.62f;
-            PitchShifter pitchShifter{9, grainPitchShiftRatio};
-            pitchShifter.process(*changedSampleBuffer);
-            grain->initGrain(changedSampleBuffer);
+            grain->initGrain(sampleBuffer);
         }
 
-        int grainNumSamples = grain->getGrainBuffer()->getNumSamples();
-        int grainPlaybackPosition = grain->getGrainPlaybackPosition();
+        grain->updateGrain(buffer, sampleBuffer);
 
-        int playbackAmount = grainNumSamples - grainPlaybackPosition;
-        playbackAmount = jmin(playbackAmount, numSamples);
-
-        // Mix the grain's waveform with the output buffer
-        for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+        if (grain->getGrainPlaybackPositionInSamples() >= grain->getGrainLengthInSamples())
         {
-            buffer.addFrom(channel, 0, *(grain->getGrainBuffer()), channel, grainPlaybackPosition, playbackAmount, 0.3f);
-        }
-
-        grain->setGrainPlaybackPosition(grainPlaybackPosition + numSamples);
-
-        grainPlaybackPosition = grain->getGrainPlaybackPosition();
-        if (grainPlaybackPosition >= grainNumSamples)
-        {
-            // Remove the grain from the pool
-            grain->getGrainBuffer()->clear();
             grainPool.erase(std::remove(grainPool.begin(), grainPool.end(), grain), grainPool.end());
-            delete grain;
-            i--; // Decrement the loop counter to account for the removed grain
+            --i;
         }
     }
 
@@ -169,11 +142,6 @@ void GranularEngine::loadSampleFromUrl(juce::URL &url)
         reader->read(sampleBuffer, 0, reader->lengthInSamples, 0, true, true);
         delete reader;
     }
-}
-
-void GranularEngine::deleteGrain(Grain *grain)
-{
-    grainPool.erase(std::remove(grainPool.begin(), grainPool.end(), grain), grainPool.end());
 }
 
 //==============================================================================

@@ -13,38 +13,59 @@ TODO:
 
 Grain::Grain()
 {
+    grainPlaybackPositionInSamples = 0;
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
 }
 
 Grain::~Grain()
 {
-    delete grainBuffer;
 }
 
 //----------------------------------------------------------------------------------------------
 
 // Init grain
 
-void Grain::initGrain(AudioSampleBuffer *sample)
+void Grain::initGrain(AudioSampleBuffer *sampleBuffer)
 {
-    const int numChannels = sample->getNumChannels();
-    const int numSamples = sample->getNumSamples();
+    const int numSamples = sampleBuffer->getNumSamples();
 
-    int grainLengthInSamples = (grainLength / grainSampleRate) * numSamples;
-    int startSample = grainStartPosition * numSamples;
-    int endSample = startSample + grainLengthInSamples;
+    grainLengthInSamples = (int)ceil(grainSampleRate * (grainLengthInMs / 1000));
+    grainStartPositionInSamples = (int)ceil(grainStartPosition * numSamples);
+    grainEndPositionInSamples = grainStartPositionInSamples + grainLengthInSamples;
+    grainLengthInSamples = grainEndPositionInSamples - grainStartPositionInSamples;
+}
 
-    int sampleLength = endSample - startSample;
-    sampleLength = jmin(sampleLength, numSamples);
+void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sampleBuffer)
+{
+    const int blockSamples = audioBlock.getNumSamples();
 
-    grainBuffer = new AudioSampleBuffer(numChannels, sampleLength);
+    int playbackAmount = grainLengthInSamples - grainPlaybackPositionInSamples;
+    playbackAmount = jmin(playbackAmount, blockSamples);
+    int positionInSamples = grainStartPositionInSamples + grainPlaybackPositionInSamples;
 
-    for (int channel = 0; channel < numChannels; ++channel)
+    // float position = grainStartPosition + (grainPlaybackPosition / (float)grainNumSamples);
+    // int intPosition = (int)ceil(position);
+
+    // Mix the grain's waveform with the output buffer
+    for (int channel = 0; channel < audioBlock.getNumChannels(); ++channel)
     {
-        grainBuffer->clear(channel, 0, grainBuffer->getNumSamples());
-        grainBuffer->copyFrom(channel, 0, *sample, channel, startSample, sampleLength);
+        audioBlock.addFrom(channel, 0, *(sampleBuffer), channel, positionInSamples, playbackAmount, 0.3f);
     }
+
+    grainPlaybackPositionInSamples += blockSamples;
+}
+
+// Cubic interpolation
+
+float Grain::cubicInterpolation(float x, float y0, float y1, float y2, float y3)
+{
+    float c0 = y1;
+    float c1 = 0.5f * (y2 - y0);
+    float c2 = y0 - 2.5f * y1 + 2.f * y2 - 0.5f * y3;
+    float c3 = 0.5f * (y3 - y0) + 1.5f * (y1 - y2);
+
+    return ((c3 * x + c2) * x + c1) * x + c0;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -58,7 +79,7 @@ void Grain::setGrainSampleRate(float sampleRate)
 
 void Grain::setGrainLengthInMs(float length)
 {
-    grainLength = length;
+    grainLengthInMs = length;
 }
 
 void Grain::setGrainVolume(float volume)
@@ -125,27 +146,22 @@ void Grain::setGrainPan(float pan)
 {
     grainPan = pan;
 }
-
-void Grain::setGrainPlaybackPosition(int position)
-{
-    grainPlaybackPosition = position;
-}
 //----------------------------------------------------------------------------------------------
 
 // Getters
-int Grain::getGrainPlaybackPosition()
+int Grain::getGrainPlaybackPositionInSamples()
 {
-    return grainPlaybackPosition;
+    return grainPlaybackPositionInSamples;
+}
+
+int Grain::getGrainLengthInSamples()
+{
+    return grainLengthInSamples;
 }
 
 float Grain::getGrainPitch()
 {
     return grainPitch;
-}
-
-AudioSampleBuffer *Grain::getGrainBuffer()
-{
-    return grainBuffer;
 }
 
 //----------------------------------------------------------------------------------------------

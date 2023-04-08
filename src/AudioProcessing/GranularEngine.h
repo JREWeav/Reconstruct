@@ -2,7 +2,6 @@
 
 #include <JuceHeader.h>
 #include "Grain.h"
-#include "../DSP/PitchShifter.h"
 
 class GranularEngine : public juce::AudioProcessor
 {
@@ -49,8 +48,6 @@ public:
     void loadSampleFromUrl(juce::URL &url);
 
     void setGrainDensityInHz(float density);
-
-    void deleteGrain(Grain *grain);
 
 private:
     //==============================================================================

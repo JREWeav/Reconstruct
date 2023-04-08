@@ -1,7 +1,6 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "../DSP/PitchShifter.h"
 
 class Grain
 {
@@ -24,36 +23,38 @@ public:
     void setGrainRandomLoop(bool randomLoop);
     void setGrainRandomReverse(bool randomReverse);
     void setGrainPan(float pan);
-    void setGrainPlaybackPosition(int position);
 
     // Getters
     float getGrainLengthInMs();
     float getGrainPitch();
-    int getGrainPlaybackPosition();
+    int getGrainPlaybackPositionInSamples();
+    int getGrainLengthInSamples();
 
-    AudioSampleBuffer *getGrainBuffer();
-
-    void deleteGrain();
-
-    void initGrain(AudioSampleBuffer *sample);
+    // Other
+    void initGrain(AudioSampleBuffer *sampleBuffer);
+    void updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sampleBuffer);
+    float cubicInterpolation(float x, float y0, float y1, float y2, float y3);
 
 private:
-    float grainLength = 0.1f;
-    float grainStartPosition = 0.0f;
-    float grainSpeed = 1.0f;
-    float grainVolume = 1.0f;
-    float grainPitch = 1.0f;
-    float grainPan = 0.0f;
-    float grainSampleRate = 44100.0f;
-    bool grainLoop = false;
-    bool grainReverse = false;
-    bool grainRandomLength = false;
-    bool grainRandomPosition = false;
-    bool grainRandomSpeed = false;
-    bool grainRandomPitch = false;
-    bool grainRandomLoop = false;
-    bool grainRandomReverse = false;
-    int grainPlaybackPosition = 0;
+    float grainLengthInMs;
+    float grainStartPosition;
+    float grainSpeed;
+    float grainVolume;
+    float grainPitch;
+    float grainPan;
+    float grainSampleRate;
+    bool grainLoop;
+    bool grainReverse;
+    bool grainRandomLength;
+    bool grainRandomPosition;
+    bool grainRandomSpeed;
+    bool grainRandomPitch;
+    bool grainRandomLoop;
+    bool grainRandomReverse;
 
-    AudioSampleBuffer *grainBuffer;
+    const float playbackRate = 1.0f;
+    int grainStartPositionInSamples;
+    int grainEndPositionInSamples;
+    int grainLengthInSamples;
+    int grainPlaybackPositionInSamples;
 };

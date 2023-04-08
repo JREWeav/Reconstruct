@@ -30,8 +30,6 @@ juce_generate_juce_header(${TargetName})
 
 target_sources(${TargetName}
     PRIVATE
-        ./src/DSP/PitchShifter.cpp
-
         ./src/AudioProcessing/Grain.cpp
         ./src/AudioProcessing/GranularEngine.cpp
         ./src/AudioProcessing/PluginProcessor.cpp
