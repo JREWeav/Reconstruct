@@ -39,18 +39,38 @@ void Grain::initGrain(AudioSampleBuffer *sampleBuffer)
 void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sampleBuffer)
 {
     const int blockSamples = audioBlock.getNumSamples();
+    const int samplesTotalSamples = sampleBuffer->getNumSamples();
+
+    // Get the sample data from the file
 
     int playbackAmount = grainLengthInSamples - grainPlaybackPositionInSamples;
     playbackAmount = jmin(playbackAmount, blockSamples);
-    int positionInSamples = grainStartPositionInSamples + grainPlaybackPositionInSamples;
-
-    // float position = grainStartPosition + (grainPlaybackPosition / (float)grainNumSamples);
-    // int intPosition = (int)ceil(position);
 
     // Mix the grain's waveform with the output buffer
     for (int channel = 0; channel < audioBlock.getNumChannels(); ++channel)
     {
-        audioBlock.addFrom(channel, 0, *(sampleBuffer), channel, positionInSamples, playbackAmount, 0.3f);
+        const float *sampleData = sampleBuffer->getReadPointer(channel);
+        float *outputData = audioBlock.getWritePointer(channel);
+
+        for (int i = 0; i < playbackAmount; ++i)
+        {
+            float grainSpeed = grainPitch / 261.62; // 261.62 is the frequency of middle C
+            float positionInFloat = ((float)(grainStartPositionInSamples + grainPlaybackPositionInSamples + i) * grainSpeed);
+            int positionInInt = (int)ceil(positionInFloat);
+            float remainder = positionInFloat - positionInInt;
+
+            if (positionInInt - 1 < 0 || positionInInt + 1 >= samplesTotalSamples) // Avoid out-of-bound indices
+                continue;
+
+            float a = sampleData[positionInInt - 1];
+            float b = sampleData[positionInInt];
+            float c = sampleData[positionInInt + 1];
+            float d = sampleData[positionInInt + 2];
+
+            float nextSample = cubicInterpolation(remainder, a, b, c, d);
+
+            outputData[i] += nextSample * 0.3f;
+        }
     }
 
     grainPlaybackPositionInSamples += blockSamples;
