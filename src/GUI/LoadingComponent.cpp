@@ -5,6 +5,7 @@ LoadingComponent::LoadingComponent(AudioFormatManager &formatManager, AudioThumb
     addAndMakeVisible(loadButton);
     addAndMakeVisible(waveForm);
     loadButton.addListener(this);
+    waveForm.addChangeListener(this);
 }
 
 LoadingComponent::~LoadingComponent()
@@ -38,5 +39,21 @@ void LoadingComponent::loadFile()
         auto *input = new juce::URLInputSource(fileChooser.getURLResult());
         waveForm.loadAudio(input);
         processor.loadSampleFromUrl(fileChooser.getURLResult());
+    }
+}
+
+void LoadingComponent::changeListenerCallback(ChangeBroadcaster *source)
+{
+    if (source == &waveForm)
+    {
+        waveForm.setRelativePosition(waveForm.getLastRelativeClick());
+        if (waveForm.isLooping())
+        {
+            processor.setSampleParameters(waveForm.getLastRelativeClick(), (waveForm.getLastRelativeClick() + waveForm.getRelativeLoopLength()));
+        }
+        else
+        {
+            processor.setSampleParameters(waveForm.getLastRelativeClick(), waveForm.getLastRelativeClick());
+        }
     }
 }
