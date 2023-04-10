@@ -36,6 +36,7 @@ public:
     float cubicInterpolation(float x, float y0, float y1, float y2, float y3);
 
 private:
+    // Grain parameters
     float grainLengthInMs;
     float grainStartPosition;
     float grainSpeed;
@@ -43,6 +44,8 @@ private:
     float grainPitch;
     float grainPan;
     float grainSampleRate;
+
+    // Randomization
     bool grainLoop;
     bool grainReverse;
     bool grainRandomLength;
@@ -52,7 +55,7 @@ private:
     bool grainRandomLoop;
     bool grainRandomReverse;
 
-    const float playbackRate = 1.0f;
+    float grainPlaybackRate = 1.0f;
     int grainStartPositionInSamples;
     int grainEndPositionInSamples;
     int grainLengthInSamples;

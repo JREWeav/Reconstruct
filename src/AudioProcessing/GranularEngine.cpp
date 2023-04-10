@@ -11,24 +11,13 @@ GranularEngine::GranularEngine(juce::AudioFormatManager &formatManager)
     : AudioProcessor(BusesProperties()), formatManager(formatManager)
 {
     timerForGrainGen = 0.0f;
-    grainDensityInHz = 1.0f;
+    grainsPerSecondInHz = 1.0f;
     processedSamples = 0;
 }
 
 GranularEngine::~GranularEngine()
 {
     delete sampleBuffer;
-}
-
-void GranularEngine::generateGrain(int midiNoteNumber, float velocity)
-{
-    Grain *grain = new Grain();
-    grain->setGrainPitch(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber));
-    grain->setGrainStartPosition(0.2);
-    grain->setGrainLengthInMs(2000);
-    grain->setGrainPan(0.5);
-    grain->setGrainVolume(0.5);
-    grainPool.push_back(grain);
 }
 
 //==============================================================================
@@ -111,6 +100,29 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
     processedSamples += numSamples;
 }
 
+void GranularEngine::generateGrain(int midiNoteNumber, float velocity)
+{
+    Grain *grain = new Grain();
+    grain->setGrainPitch(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber));
+
+    // Set the grain's start position based off of waveform
+    if (sampleStart == sampleEnd)
+    {
+        grain->setGrainStartPosition(sampleStart);
+    }
+    else
+    {
+        float grainStartPosition = (sampleEnd - sampleStart) * random.nextFloat() / (1 + sampleStart);
+        grain->setGrainStartPosition(grainStartPosition);
+    }
+
+    grain->setGrainLengthInMs(grainLengthInMs);
+    grain->setGrainPan(grainPan);
+    grain->setGrainSpeed(grainSpeed);
+    grain->setGrainVolume(0.5);
+    grainPool.push_back(grain);
+}
+
 //==============================================================================
 
 bool GranularEngine::hasEditor() const
@@ -124,11 +136,35 @@ AudioProcessorEditor *GranularEngine::createEditor()
 }
 
 //==============================================================================
-
-void GranularEngine::setGrainDensityInHz(float density)
+// Grain parameters
+void GranularEngine::setGrainDensityInHz(float hz)
 {
-    grainDensityInHz = density;
-    grainInterval = 1000 / grainDensityInHz;
+    grainsPerSecondInHz = hz;
+    grainInterval = 1000 / grainsPerSecondInHz;
+}
+
+void GranularEngine::setGrainLengthInMs(float ms)
+{
+    grainLengthInMs = ms;
+}
+
+void GranularEngine::setGrainPan(float pan)
+{
+    grainPan = pan;
+}
+
+void GranularEngine::setGrainSpeed(float speed)
+{
+    grainSpeed = speed;
+}
+// Sample parameters
+void GranularEngine::setRelativeSampleStart(float start)
+{
+    sampleStart = start;
+}
+void GranularEngine::setRelativeSampleEnd(float end)
+{
+    sampleEnd = end;
 }
 
 //==============================================================================

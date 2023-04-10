@@ -12,7 +12,8 @@
     your controls and content.
 */
 class AudioWaveform : public juce::Component,
-                      public juce::ChangeListener
+                      public juce::ChangeListener,
+                      public juce::ChangeBroadcaster
 {
 public:
     //==============================================================================

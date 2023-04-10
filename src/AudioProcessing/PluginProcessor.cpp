@@ -148,6 +148,20 @@ void AudioPluginAudioProcessor::loadSampleFromUrl(juce::URL &url)
     granularEngine.loadSampleFromUrl(url);
 }
 
+void AudioPluginAudioProcessor::setGrainParameters(float grainDensityInHz, float grainLengthInMs, float grainPan, float grainSpeed)
+{
+    granularEngine.setGrainDensityInHz(grainDensityInHz);
+    granularEngine.setGrainLengthInMs(grainLengthInMs);
+    granularEngine.setGrainPan(grainPan);
+    granularEngine.setGrainSpeed(grainSpeed);
+}
+
+void AudioPluginAudioProcessor::setSampleParameters(float sampleStart, float sampleEnd)
+{
+    granularEngine.setRelativeSampleStart(sampleStart);
+    granularEngine.setRelativeSampleEnd(sampleEnd);
+}
+
 //==============================================================================
 bool AudioPluginAudioProcessor::hasEditor() const
 {

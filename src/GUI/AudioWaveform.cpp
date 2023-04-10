@@ -2,9 +2,7 @@
 
 /*
 TODO:
-- Make the waveform control grain start and end points
 - Add grains to the waveform
-- Remove the playhead or move it to the start of the grain
 */
 
 //==============================================================================
@@ -94,6 +92,7 @@ void AudioWaveform::mouseDown(const MouseEvent &event)
     {
         looping = false;
         lastRelativeClick = (double)event.getMouseDownX() / (double)getWidth();
+        sendChangeMessage();
     }
 }
 
@@ -104,6 +103,7 @@ void AudioWaveform::mouseDrag(const MouseEvent &event)
         looping = true;
         loopRelativeLength = (double)event.getDistanceFromDragStartX() / (double)getWidth();
         repaint();
+        sendChangeMessage();
     }
 }
 

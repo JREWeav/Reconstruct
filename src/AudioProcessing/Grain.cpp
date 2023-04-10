@@ -2,11 +2,7 @@
 
 /*
 TODO:
-- Make the waveform control grain start and end points
-- Control pitch and speed of the grain
-- Add Panning
 - Add randomisation to all parameters
-- Add looping
 - Add AMP envelopes (Start with ADSR)
 - Add reverse?
 */
@@ -16,6 +12,7 @@ Grain::Grain()
     grainPlaybackPositionInSamples = 0;
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
+    grainVolume = 0.5;
 }
 
 Grain::~Grain()
@@ -30,9 +27,18 @@ void Grain::initGrain(AudioSampleBuffer *sampleBuffer)
 {
     const int numSamples = sampleBuffer->getNumSamples();
 
-    grainLengthInSamples = (int)ceil(grainSampleRate * (grainLengthInMs / 1000));
+    float grainSpeedInFloat = grainSpeed / 100.0f;
+
+    // Setting a max pitch of 4000Hz so that the grain doesn't get too high pitched or skipped entirely
+    const float maxPitch = 4000.0f;
+    grainPlaybackRate = jmin(grainPitch / 261.62, maxPitch / 261.62);
+
+    grainPlaybackRate *= grainSpeedInFloat;
+
+    grainLengthInSamples = (int)ceil((grainSampleRate * (grainLengthInMs / 1000)) * grainPlaybackRate);
     grainStartPositionInSamples = (int)ceil(grainStartPosition * numSamples);
     grainEndPositionInSamples = grainStartPositionInSamples + grainLengthInSamples;
+    grainEndPositionInSamples = jmin(grainEndPositionInSamples, numSamples);
     grainLengthInSamples = grainEndPositionInSamples - grainStartPositionInSamples;
 }
 
@@ -54,26 +60,41 @@ void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sample
 
         for (int i = 0; i < playbackAmount; ++i)
         {
-            float grainSpeed = grainPitch / 261.62; // 261.62 is the frequency of middle C
-            float positionInFloat = ((float)(grainStartPositionInSamples + grainPlaybackPositionInSamples + i) * grainSpeed);
+            float positionInFloat = ((float)(grainStartPositionInSamples + grainPlaybackPositionInSamples + i) * grainPlaybackRate);
             int positionInInt = (int)ceil(positionInFloat);
             float remainder = positionInFloat - positionInInt;
 
-            if (positionInInt - 1 < 0 || positionInInt + 1 >= samplesTotalSamples) // Avoid out-of-bound indices
+            if (positionInInt - 1 < 0 || positionInInt + 1 >= samplesTotalSamples)
                 continue;
 
-            float a = sampleData[positionInInt - 1];
-            float b = sampleData[positionInInt];
-            float c = sampleData[positionInInt + 1];
-            float d = sampleData[positionInInt + 2];
+            // Cubic interpolation
+            float y0 = sampleData[positionInInt - 1];
+            float y1 = sampleData[positionInInt];
+            float y2 = sampleData[positionInInt + 1];
+            float y3 = sampleData[positionInInt + 2];
 
-            float nextSample = cubicInterpolation(remainder, a, b, c, d);
+            float nextSample = cubicInterpolation(remainder, y0, y1, y2, y3);
 
-            outputData[i] += nextSample * 0.3f;
+            // Panning
+            float grainPanInFloat = grainPan / 100.0f;
+            float grainPanL = sqrt(1.0f - grainPanInFloat);
+            float grainPanR = sqrt(grainPanInFloat);
+
+            if (audioBlock.getNumChannels() == 2)
+            {
+
+                if (channel == 0)
+                    nextSample *= grainPanL;
+                else if (channel == 1)
+                {
+                    nextSample *= grainPanR;
+                }
+            }
+            outputData[i] += nextSample * grainVolume;
         }
-    }
 
-    grainPlaybackPositionInSamples += blockSamples;
+        grainPlaybackPositionInSamples += playbackAmount;
+    }
 }
 
 // Cubic interpolation

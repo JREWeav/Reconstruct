@@ -47,20 +47,38 @@ public:
 
     void loadSampleFromUrl(juce::URL &url);
 
-    void setGrainDensityInHz(float density);
+    void setRelativeSampleStart(float sampleStart);
+    void setRelativeSampleEnd(float sampleEnd);
+
+    void setGrainDensityInHz(float grainsPerSecondInHz);
+    void setGrainLengthInMs(float grainLengthInMs);
+    void setGrainSpeed(float grainSpeed);
+    void setGrainPan(float grainPan);
 
 private:
     //==============================================================================
     std::vector<Grain *> grainPool;
     juce::AudioFormatManager &formatManager;
-    float grainDensityInHz;
     float timerForGrainGen;
     float grainInterval;
     AudioSampleBuffer *sampleBuffer;
     double storedSampleRate;
     int processedSamples;
 
+    Random random;
+
     std::vector<MidiMessage> heldNotes;
+
+    // Grain parameters
+    float grainLengthInMs;
+    float grainSpeed;
+    float grainPan;
+    float grainsPerSecondInHz;
+    float grainVolume;
+
+    // Sample parameters
+    float sampleStart;
+    float sampleEnd;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GranularEngine)
 };
