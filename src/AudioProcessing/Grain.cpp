@@ -35,12 +35,10 @@ void Grain::initGrain(AudioSampleBuffer *sampleBuffer)
 {
     const int numSamples = sampleBuffer->getNumSamples();
 
-    float grainSpeedInFloat = grainSpeed / 100.0f;
-
     // Setting a max pitch of 4000Hz so that the grain doesn't get too high pitched or skipped entirely
     const float maxPitch = 4000.0f;
     grainPlaybackRate = jmin(grainPitch / 261.62, maxPitch / 261.62);
-
+    float grainSpeedInFloat = grainSpeed / 100.0f;
     grainPlaybackRate *= grainSpeedInFloat;
 
     grainLengthInSamples = (int)ceil((grainSampleRate * (grainLengthInMs / 1000.0f)) * grainPlaybackRate);
@@ -63,6 +61,7 @@ void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sample
     int playbackAmount = grainLengthInSamples - grainPlaybackPositionInSamples;
     playbackAmount = jmin(playbackAmount, blockSamples);
 
+    dsp::WindowingFunction<float> window{(size_t)playbackAmount, dsp::WindowingFunction<float>::hann, true};
     // Mix the grain's waveform with the output buffer
     for (int channel = 0; channel < audioBlock.getNumChannels(); ++channel)
     {
@@ -82,10 +81,10 @@ void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sample
                 continue;
 
             // Cubic interpolation
-            float y0 = sampleData[positionInInt - 1];
-            float y1 = sampleData[positionInInt];
-            float y2 = sampleData[positionInInt + 1];
-            float y3 = sampleData[positionInInt + 2];
+            float y0 = sampleData[positionInInt];
+            float y1 = sampleData[positionInInt + 1];
+            float y2 = sampleData[positionInInt + 2];
+            float y3 = sampleData[positionInInt + 3];
 
             float nextSample = cubicInterpolation(remainder, y0, y1, y2, y3);
 
@@ -105,8 +104,8 @@ void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sample
             }
             outputData[i] += (nextSample * grainEnvelope[grainPlaybackPositionInSamples + i] * grainVolumeInFloat);
         }
-        grainPlaybackPositionInSamples += playbackAmount;
     }
+    grainPlaybackPositionInSamples += playbackAmount;
 }
 
 // Cubic interpolation
@@ -143,8 +142,12 @@ void Grain::generateEnvelope(float a, float d, float s, float r, int lengthInSam
         }
         else
         {
-            grainEnvelope[i] = (1.0f - (i - lengthInSamples) / releaseSamples);
+            grainEnvelope[i] = (s * (1.0f - (float)(i - (lengthInSamples - releaseSamples)) / (float)releaseSamples));
         }
+    }
+    for (int j = 0; j < 10; j++)
+    {
+        DBG("Grain envelope: " << j << " " << String(grainEnvelope[lengthInSamples - 10 + j]));
     }
 }
 //----------------------------------------------------------------------------------------------
