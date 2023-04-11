@@ -25,14 +25,29 @@ private:
     URL audioURL;
     AudioPluginAudioProcessor &processor;
 
+    // Grains per second
     juce::Slider grainsPerSecondSlider;
     juce::Label grainsPerSecondLabel;
+
+    // Grain parameters
     juce::Slider grainLengthSlider;
     juce::Label grainLengthLabel;
     juce::Slider grainSpeedSlider;
     juce::Label grainSpeedLabel;
     juce::Slider grainPanSlider;
     juce::Label grainPanLabel;
+    juce::Slider grainVolumeSlider;
+    juce::Label grainVolumeLabel;
+
+    // Grain Randomness
+    juce::Slider grainLengthRandomnessSlider;
+    juce::Label grainLengthRandomnessLabel;
+    juce::Slider grainSpeedRandomnessSlider;
+    juce::Label grainSpeedRandomnessLabel;
+    juce::Slider grainPanRandomnessSlider;
+    juce::Label grainPanRandomnessLabel;
+    juce::Slider grainVolumeRandomnessSlider;
+    juce::Label grainVolumeRandomnessLabel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainGUI)
 };

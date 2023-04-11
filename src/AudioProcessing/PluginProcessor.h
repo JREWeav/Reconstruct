@@ -44,7 +44,9 @@ public:
     void setStateInformation(const void *data, int sizeInBytes) override;
     //==============================================================================
     void loadSampleFromUrl(juce::URL &url);
-    void setGrainParameters(float grainsPerSecondInHz, float grainLengthInMs, float grainSpeed, float grainPan);
+    void setGrainsPerSecond(float grainsPerSecond);
+    void setGrainParameters(float randomGrainVolume, int grainLengthInMs, float grainSpeed, float grainPan);
+    void setRandomParameters(float randomGrainVolume, int randomGrainLengthInMs, float randomGrainSpeed, float randomGrainPan);
 
     void setSampleParameters(float sampleStart, float sampleEnd);
 

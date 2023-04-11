@@ -12,7 +12,15 @@ Grain::Grain()
     grainPlaybackPositionInSamples = 0;
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
-    grainVolume = 0.5;
+    grainVolume = 50;
+    grainLengthInMs = 100;
+    grainSpeed = 100;
+    grainPan = 50;
+
+    // Misc parameters
+    grainStartPosition = 0;
+    grainPitch = 261.62;
+    grainSampleRate = 44100;
 }
 
 Grain::~Grain()
@@ -35,17 +43,20 @@ void Grain::initGrain(AudioSampleBuffer *sampleBuffer)
 
     grainPlaybackRate *= grainSpeedInFloat;
 
-    grainLengthInSamples = (int)ceil((grainSampleRate * (grainLengthInMs / 1000)) * grainPlaybackRate);
+    grainLengthInSamples = (int)ceil((grainSampleRate * (grainLengthInMs / 1000.0f)) * grainPlaybackRate);
     grainStartPositionInSamples = (int)ceil(grainStartPosition * numSamples);
+    grainStartPositionInSamples = jmax(grainStartPositionInSamples, 1);
     grainEndPositionInSamples = grainStartPositionInSamples + grainLengthInSamples;
     grainEndPositionInSamples = jmin(grainEndPositionInSamples, numSamples);
     grainLengthInSamples = grainEndPositionInSamples - grainStartPositionInSamples;
+    generateEnvelope(0.1, 0.2, 0.5, 0.2, grainLengthInSamples, grainVolume);
 }
 
 void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sampleBuffer)
 {
     const int blockSamples = audioBlock.getNumSamples();
     const int samplesTotalSamples = sampleBuffer->getNumSamples();
+    float grainVolumeInFloat = grainVolume / 100.0f;
 
     // Get the sample data from the file
 
@@ -60,11 +71,14 @@ void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sample
 
         for (int i = 0; i < playbackAmount; ++i)
         {
+            if (grainPlaybackPositionInSamples + i >= grainLengthInSamples)
+                continue;
+
             float positionInFloat = ((float)(grainStartPositionInSamples + grainPlaybackPositionInSamples + i) * grainPlaybackRate);
             int positionInInt = (int)ceil(positionInFloat);
             float remainder = positionInFloat - positionInInt;
 
-            if (positionInInt - 1 < 0 || positionInInt + 1 >= samplesTotalSamples)
+            if (positionInInt - 1 < 0 || positionInInt + 2 >= samplesTotalSamples)
                 continue;
 
             // Cubic interpolation
@@ -82,7 +96,6 @@ void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sample
 
             if (audioBlock.getNumChannels() == 2)
             {
-
                 if (channel == 0)
                     nextSample *= grainPanL;
                 else if (channel == 1)
@@ -90,9 +103,8 @@ void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sample
                     nextSample *= grainPanR;
                 }
             }
-            outputData[i] += nextSample * grainVolume;
+            outputData[i] += (nextSample * grainEnvelope[grainPlaybackPositionInSamples + i] * grainVolumeInFloat);
         }
-
         grainPlaybackPositionInSamples += playbackAmount;
     }
 }
@@ -109,6 +121,32 @@ float Grain::cubicInterpolation(float x, float y0, float y1, float y2, float y3)
     return ((c3 * x + c2) * x + c1) * x + c0;
 }
 
+void Grain::generateEnvelope(float a, float d, float s, float r, int lengthInSamples, float peakVolume)
+{
+    int attackSamples = (int)ceil(a * lengthInSamples);
+    int decaySamples = (int)ceil(d * lengthInSamples);
+    int releaseSamples = (int)ceil(r * lengthInSamples);
+    grainEnvelope.resize(lengthInSamples + 1);
+    for (int i = 0; i < lengthInSamples; i++)
+    {
+        if (i < attackSamples)
+        {
+            grainEnvelope[i] = ((float)i / (float)attackSamples);
+        }
+        else if (i < attackSamples + decaySamples)
+        {
+            grainEnvelope[i] = (1.0f - (1.0f - s) * (i - attackSamples) / decaySamples);
+        }
+        else if (i < lengthInSamples - releaseSamples)
+        {
+            grainEnvelope[i] = (s);
+        }
+        else
+        {
+            grainEnvelope[i] = (1.0f - (i - lengthInSamples) / releaseSamples);
+        }
+    }
+}
 //----------------------------------------------------------------------------------------------
 
 // Setters
@@ -118,7 +156,7 @@ void Grain::setGrainSampleRate(float sampleRate)
     grainSampleRate = sampleRate;
 }
 
-void Grain::setGrainLengthInMs(float length)
+void Grain::setGrainLengthInMs(int length)
 {
     grainLengthInMs = length;
 }

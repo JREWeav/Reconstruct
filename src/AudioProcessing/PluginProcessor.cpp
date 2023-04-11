@@ -12,7 +12,6 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
 #endif
       )
 {
-    granularEngine.setGrainDensityInHz(1);
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
@@ -148,12 +147,25 @@ void AudioPluginAudioProcessor::loadSampleFromUrl(juce::URL &url)
     granularEngine.loadSampleFromUrl(url);
 }
 
-void AudioPluginAudioProcessor::setGrainParameters(float grainDensityInHz, float grainLengthInMs, float grainPan, float grainSpeed)
+void AudioPluginAudioProcessor::setGrainsPerSecond(float grainsPerSecond)
 {
-    granularEngine.setGrainDensityInHz(grainDensityInHz);
+    granularEngine.setGrainsPerSecond(grainsPerSecond);
+}
+
+void AudioPluginAudioProcessor::setGrainParameters(float grainVolume, int grainLengthInMs, float grainPan, float grainSpeed)
+{
+    granularEngine.setGrainVolume(grainVolume);
     granularEngine.setGrainLengthInMs(grainLengthInMs);
     granularEngine.setGrainPan(grainPan);
     granularEngine.setGrainSpeed(grainSpeed);
+}
+
+void AudioPluginAudioProcessor::setRandomParameters(float randomGrainVolume, int randomGrainLengthInMs, float randomGrainSpeed, float randomGrainPan)
+{
+    granularEngine.setRandomGrainVolume(randomGrainVolume);
+    granularEngine.setRandomGrainLengthInMs(randomGrainLengthInMs);
+    granularEngine.setRandomGrainSpeed(randomGrainSpeed);
+    granularEngine.setRandomGrainPan(randomGrainPan);
 }
 
 void AudioPluginAudioProcessor::setSampleParameters(float sampleStart, float sampleEnd)

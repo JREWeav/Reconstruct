@@ -8,7 +8,7 @@ public:
     Grain();
     ~Grain();
     // Setters
-    void setGrainLengthInMs(float length);
+    void setGrainLengthInMs(int length);
     void setGrainStartPosition(float position);
     void setGrainVolume(float volume);
     void setGrainPitch(float pitch);
@@ -34,15 +34,18 @@ public:
     void initGrain(AudioSampleBuffer *sampleBuffer);
     void updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sampleBuffer);
     float cubicInterpolation(float x, float y0, float y1, float y2, float y3);
+    void generateEnvelope(float a, float d, float s, float r, int lengthInSamples, float peakVolume);
 
 private:
     // Grain parameters
-    float grainLengthInMs;
-    float grainStartPosition;
-    float grainSpeed;
     float grainVolume;
-    float grainPitch;
+    int grainLengthInMs;
+    float grainSpeed;
     float grainPan;
+
+    // Misc parameters
+    float grainStartPosition;
+    float grainPitch;
     float grainSampleRate;
 
     // Randomization
@@ -60,4 +63,7 @@ private:
     int grainEndPositionInSamples;
     int grainLengthInSamples;
     int grainPlaybackPositionInSamples;
+
+    // Envelope
+    std::vector<float> grainEnvelope;
 };

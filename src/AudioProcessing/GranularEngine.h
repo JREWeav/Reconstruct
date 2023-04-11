@@ -47,13 +47,23 @@ public:
 
     void loadSampleFromUrl(juce::URL &url);
 
+    // Setters for sample parameters
     void setRelativeSampleStart(float sampleStart);
     void setRelativeSampleEnd(float sampleEnd);
 
-    void setGrainDensityInHz(float grainsPerSecondInHz);
-    void setGrainLengthInMs(float grainLengthInMs);
-    void setGrainSpeed(float grainSpeed);
-    void setGrainPan(float grainPan);
+    void setGrainsPerSecond(float grainsPerSecond);
+
+    // Setters for grain parameters
+    void setGrainVolume(float _grainVolume);
+    void setGrainLengthInMs(int _grainLengthInMs);
+    void setGrainSpeed(float _grainSpeed);
+    void setGrainPan(float _grainPan);
+
+    // Setters for randomization
+    void setRandomGrainVolume(float _randomGrainVolume);
+    void setRandomGrainLengthInMs(int _randomGrainLengthInMs);
+    void setRandomGrainSpeed(float _randomGrainSpeed);
+    void setRandomGrainPan(float _randomGrainPan);
 
 private:
     //==============================================================================
@@ -69,16 +79,24 @@ private:
 
     std::vector<MidiMessage> heldNotes;
 
-    // Grain parameters
-    float grainLengthInMs;
-    float grainSpeed;
-    float grainPan;
-    float grainsPerSecondInHz;
-    float grainVolume;
-
     // Sample parameters
     float sampleStart;
     float sampleEnd;
+
+    // Grains per second
+    float grainsPerSecond;
+
+    // Grain parameters
+    float grainVolume;
+    int grainLengthInMs;
+    float grainSpeed;
+    float grainPan;
+
+    // Randomization parameters
+    float randomGrainVolume;
+    int randomGrainLengthInMs;
+    float randomGrainSpeed;
+    float randomGrainPan;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GranularEngine)
 };

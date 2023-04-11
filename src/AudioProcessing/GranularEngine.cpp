@@ -11,8 +11,13 @@ GranularEngine::GranularEngine(juce::AudioFormatManager &formatManager)
     : AudioProcessor(BusesProperties()), formatManager(formatManager)
 {
     timerForGrainGen = 0.0f;
-    grainsPerSecondInHz = 1.0f;
     processedSamples = 0;
+
+    // Random Parameters
+    randomGrainVolume = 0;
+    randomGrainLengthInMs = 0;
+    randomGrainSpeed = 0;
+    randomGrainPan = 0;
 }
 
 GranularEngine::~GranularEngine()
@@ -116,10 +121,20 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity)
         grain->setGrainStartPosition(grainStartPosition);
     }
 
-    grain->setGrainLengthInMs(grainLengthInMs);
-    grain->setGrainPan(grainPan);
-    grain->setGrainSpeed(grainSpeed);
-    grain->setGrainVolume(0.5);
+    // Implement randomness
+    float newGrainVolume = grainVolume + ((random.nextFloat() * randomGrainVolume * 2.0f) - randomGrainVolume);
+    newGrainVolume = jmax(0, (int)(jmin(150, (int)newGrainVolume)));
+    int newGrainLengthInMs = grainLengthInMs + ((int)ceil(((random.nextFloat() * (float)randomGrainLengthInMs * 2.0f))) - randomGrainLengthInMs);
+    newGrainLengthInMs = jmax(0, newGrainLengthInMs);
+    float newGrainSpeed = grainSpeed + ((random.nextFloat() * randomGrainSpeed * 2.0f) - randomGrainSpeed);
+    newGrainSpeed = jmax(0.0f, newGrainSpeed);
+    float newGrainPan = grainPan + ((random.nextFloat() * randomGrainPan * 2.0f) - randomGrainPan);
+    newGrainPan = jmax(0.0f, jmin(100.0f, newGrainPan));
+
+    grain->setGrainLengthInMs(newGrainLengthInMs);
+    grain->setGrainPan(newGrainPan);
+    grain->setGrainSpeed(newGrainSpeed);
+    grain->setGrainVolume(newGrainVolume);
     grainPool.push_back(grain);
 }
 
@@ -136,27 +151,7 @@ AudioProcessorEditor *GranularEngine::createEditor()
 }
 
 //==============================================================================
-// Grain parameters
-void GranularEngine::setGrainDensityInHz(float hz)
-{
-    grainsPerSecondInHz = hz;
-    grainInterval = 1000 / grainsPerSecondInHz;
-}
 
-void GranularEngine::setGrainLengthInMs(float ms)
-{
-    grainLengthInMs = ms;
-}
-
-void GranularEngine::setGrainPan(float pan)
-{
-    grainPan = pan;
-}
-
-void GranularEngine::setGrainSpeed(float speed)
-{
-    grainSpeed = speed;
-}
 // Sample parameters
 void GranularEngine::setRelativeSampleStart(float start)
 {
@@ -165,6 +160,50 @@ void GranularEngine::setRelativeSampleStart(float start)
 void GranularEngine::setRelativeSampleEnd(float end)
 {
     sampleEnd = end;
+}
+
+// Grains per second
+void GranularEngine::setGrainsPerSecond(float hz)
+{
+    grainsPerSecond = hz;
+    grainInterval = 1000 / grainsPerSecond;
+}
+
+// Grain parameters
+void GranularEngine::setGrainVolume(float _grainVolume)
+{
+    grainVolume = _grainVolume;
+}
+void GranularEngine::setGrainLengthInMs(int _grainLengthInMs)
+{
+    grainLengthInMs = _grainLengthInMs;
+}
+void GranularEngine::setGrainPan(float _grainPan)
+{
+    grainPan = _grainPan;
+}
+void GranularEngine::setGrainSpeed(float _grainSpeed)
+{
+    grainSpeed = _grainSpeed;
+}
+
+// Randomness parameters
+
+void GranularEngine::setRandomGrainVolume(float _randomGrainVolume)
+{
+    randomGrainVolume = _randomGrainVolume;
+}
+void GranularEngine::setRandomGrainLengthInMs(int _randomGrainLengthInMs)
+{
+    randomGrainLengthInMs = _randomGrainLengthInMs;
+}
+void GranularEngine::setRandomGrainPan(float _randomGrainPan)
+{
+    randomGrainPan = _randomGrainPan;
+}
+void GranularEngine::setRandomGrainSpeed(float _randomGrainSpeed)
+{
+    randomGrainSpeed = _randomGrainSpeed;
 }
 
 //==============================================================================
@@ -247,8 +286,8 @@ void GranularEngine::setCurrentProgram(int index)
 
 const juce::String GranularEngine::getProgramName(int index)
 {
-    return {};
     juce::ignoreUnused(index);
+    return {};
 }
 
 void GranularEngine::changeProgramName(int index, const juce::String &newName)
