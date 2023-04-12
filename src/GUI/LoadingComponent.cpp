@@ -38,7 +38,8 @@ void LoadingComponent::loadFile()
     {
         auto *input = new juce::URLInputSource(fileChooser.getURLResult());
         waveForm.loadAudio(input);
-        processor.loadSampleFromUrl(fileChooser.getURLResult());
+        auto url = fileChooser.getURLResult();
+        processor.loadSampleFromUrl(url);
     }
 }
 
