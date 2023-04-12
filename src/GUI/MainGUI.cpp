@@ -15,7 +15,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     addAndMakeVisible(grainsPerSecondSlider);
     grainsPerSecondSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
     grainsPerSecondSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
-    grainsPerSecondSlider.setRange(0.0f, 440.0f, 0.1f);
+    grainsPerSecondSlider.setRange(0.0f, 500.0f, 0.1f);
     grainsPerSecondSlider.setValue(1.0f);
     grainsPerSecondSlider.addListener(this);
     addAndMakeVisible(grainsPerSecondLabel);
@@ -38,7 +38,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     addAndMakeVisible(grainLengthSlider);
     grainLengthSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
     grainLengthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
-    grainLengthSlider.setRange(1, 4000, 1);
+    grainLengthSlider.setRange(1, 500, 1);
     grainLengthSlider.setValue(100);
     grainLengthSlider.addListener(this);
     addAndMakeVisible(grainLengthLabel);
@@ -49,7 +49,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     addAndMakeVisible(grainSpeedSlider);
     grainSpeedSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
     grainSpeedSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
-    grainSpeedSlider.setRange(0, 200, 1);
+    grainSpeedSlider.setRange(0, 400, 1);
     grainSpeedSlider.setValue(100);
     grainSpeedSlider.addListener(this);
     addAndMakeVisible(grainSpeedLabel);
@@ -72,7 +72,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     addAndMakeVisible(grainLengthRandomnessSlider);
     grainLengthRandomnessSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
     grainLengthRandomnessSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
-    grainLengthRandomnessSlider.setRange(0, 100, 1);
+    grainLengthRandomnessSlider.setRange(0, 200, 1);
     grainLengthRandomnessSlider.setValue(0);
     grainLengthRandomnessSlider.addListener(this);
     addAndMakeVisible(grainLengthRandomnessLabel);
@@ -83,7 +83,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     addAndMakeVisible(grainSpeedRandomnessSlider);
     grainSpeedRandomnessSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
     grainSpeedRandomnessSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
-    grainSpeedRandomnessSlider.setRange(0, 50, 1);
+    grainSpeedRandomnessSlider.setRange(0, 300, 1);
     grainSpeedRandomnessSlider.setValue(0);
     grainSpeedRandomnessSlider.addListener(this);
     addAndMakeVisible(grainSpeedRandomnessLabel);

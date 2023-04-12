@@ -61,7 +61,6 @@ void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sample
     int playbackAmount = grainLengthInSamples - grainPlaybackPositionInSamples;
     playbackAmount = jmin(playbackAmount, blockSamples);
 
-    dsp::WindowingFunction<float> window{(size_t)playbackAmount, dsp::WindowingFunction<float>::hann, true};
     // Mix the grain's waveform with the output buffer
     for (int channel = 0; channel < audioBlock.getNumChannels(); ++channel)
     {
@@ -73,7 +72,7 @@ void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sample
             if (grainPlaybackPositionInSamples + i >= grainLengthInSamples)
                 continue;
 
-            float positionInFloat = ((float)(grainStartPositionInSamples + grainPlaybackPositionInSamples + i) * grainPlaybackRate);
+            float positionInFloat = ((float)(grainPlaybackPositionInSamples + i) * grainPlaybackRate + grainStartPositionInSamples);
             int positionInInt = (int)ceil(positionInFloat);
             float remainder = positionInFloat - positionInInt;
 

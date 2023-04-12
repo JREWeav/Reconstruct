@@ -22,6 +22,7 @@ GranularEngine::GranularEngine(juce::AudioFormatManager &formatManager)
 
 GranularEngine::~GranularEngine()
 {
+    sampleBuffer->clear();
     delete sampleBuffer;
 }
 
@@ -117,7 +118,7 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity)
     }
     else
     {
-        float grainStartPosition = (sampleEnd - sampleStart) * random.nextFloat() / (1 + sampleStart);
+        float grainStartPosition = (sampleEnd - sampleStart) * random.nextFloat() + sampleStart;
         grain->setGrainStartPosition(grainStartPosition);
     }
 
@@ -130,6 +131,9 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity)
     newGrainSpeed = jmax(0.0f, newGrainSpeed);
     float newGrainPan = grainPan + ((random.nextFloat() * randomGrainPan * 2.0f) - randomGrainPan);
     newGrainPan = jmax(0.0f, jmin(100.0f, newGrainPan));
+
+    if (newGrainLengthInMs == 0 || newGrainSpeed == 0 || newGrainVolume == 0)
+        return;
 
     grain->setGrainLengthInMs(newGrainLengthInMs);
     grain->setGrainPan(newGrainPan);
