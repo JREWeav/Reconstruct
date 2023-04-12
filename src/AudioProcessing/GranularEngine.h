@@ -72,7 +72,7 @@ private:
     float timerForGrainGen;
     float grainInterval;
     AudioSampleBuffer *sampleBuffer;
-    double storedSampleRate;
+    float storedSampleRate;
     int processedSamples;
 
     Random random;

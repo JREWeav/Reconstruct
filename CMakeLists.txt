@@ -4,7 +4,7 @@ set (TargetName Reconstruct)
 set (CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 project(RECONSTRUCT 
-        VERSION 0.0.1
+        VERSION 0.5.1
         LANGUAGES CXX
         DESCRIPTION "Reconstruct is a plugin for Granular Synthesis")
 
