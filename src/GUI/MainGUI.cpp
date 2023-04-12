@@ -127,8 +127,8 @@ void MainGUI::paint(juce::Graphics &g)
 void MainGUI::resized()
 {
     // 16:10 setup
-    float getW = (getWidth() / 16);
-    float getH = (getHeight() / 10);
+    int getW = (getWidth() / 16);
+    int getH = (getHeight() / 10);
 
     // Load Component
     loadComponent.setBounds(0, 0, getW * 16, getH * 5);
@@ -160,18 +160,18 @@ void MainGUI::sliderValueChanged(juce::Slider *slider)
     // Grains per second
     if (slider == &grainsPerSecondSlider)
     {
-        processor.setGrainsPerSecond(grainsPerSecondSlider.getValue());
+        processor.setGrainsPerSecond((float)grainsPerSecondSlider.getValue());
     }
 
     // Grain Parameters
     else if (slider == &grainLengthSlider || slider == &grainPanSlider || slider == &grainSpeedSlider || slider == &grainVolumeSlider)
     {
-        processor.setGrainParameters(grainVolumeSlider.getValue(), grainLengthSlider.getValue(), grainPanSlider.getValue(), grainSpeedSlider.getValue());
+        processor.setGrainParameters((float)grainVolumeSlider.getValue(), (int)grainLengthSlider.getValue(), (float)grainPanSlider.getValue(), (float)grainSpeedSlider.getValue());
     }
 
     // Grain Randomization
     else if (slider == &grainVolumeRandomnessSlider || slider == &grainPanRandomnessSlider || slider == &grainSpeedRandomnessSlider || slider == &grainLengthRandomnessSlider)
     {
-        processor.setRandomParameters(grainVolumeRandomnessSlider.getValue(), grainLengthRandomnessSlider.getValue(), grainSpeedRandomnessSlider.getValue(), grainPanRandomnessSlider.getValue());
+        processor.setRandomParameters((float)grainVolumeRandomnessSlider.getValue(), (int)grainLengthRandomnessSlider.getValue(), (float)grainSpeedRandomnessSlider.getValue(), (float)grainPanRandomnessSlider.getValue());
     }
 }

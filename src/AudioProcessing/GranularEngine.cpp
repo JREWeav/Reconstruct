@@ -2,11 +2,6 @@
 
 //==============================================================================
 
-/*
-TODO:
-- Make all parameters controllable by the GUI
-*/
-
 GranularEngine::GranularEngine(juce::AudioFormatManager &formatManager)
     : AudioProcessor(BusesProperties()), formatManager(formatManager)
 {
@@ -31,6 +26,7 @@ GranularEngine::~GranularEngine()
 void GranularEngine::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     storedSampleRate = sampleRate;
+    juce::ignoreUnused(samplesPerBlock);
 }
 
 void GranularEngine::releaseResources()
@@ -43,7 +39,6 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
     // Your audio-processing code goes here!
     // For more details, see the help for AudioProcessor::processBlock()
     const int numSamples = buffer.getNumSamples();
-    const int numChannels = buffer.getNumChannels();
     float timePassed = round(((float)numSamples / storedSampleRate) * 1000);
 
     for (const MidiMessageMetadata metadata : midiMessages)
@@ -109,7 +104,7 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
 void GranularEngine::generateGrain(int midiNoteNumber, float velocity)
 {
     Grain *grain = new Grain();
-    grain->setGrainPitch(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber));
+    grain->setGrainPitch((float)juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber));
 
     // Set the grain's start position based off of waveform
     if (sampleStart == sampleEnd)
@@ -124,7 +119,7 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity)
 
     // Implement randomness
     float newGrainVolume = grainVolume + ((random.nextFloat() * randomGrainVolume * 2.0f) - randomGrainVolume);
-    newGrainVolume = jmax(0, (int)(jmin(150, (int)newGrainVolume)));
+    newGrainVolume = (float)jmax(0, (int)(jmin(150, (int)newGrainVolume)));
     int newGrainLengthInMs = grainLengthInMs + ((int)ceil(((random.nextFloat() * (float)randomGrainLengthInMs * 2.0f))) - randomGrainLengthInMs);
     newGrainLengthInMs = jmax(0, newGrainLengthInMs);
     float newGrainSpeed = grainSpeed + ((random.nextFloat() * randomGrainSpeed * 2.0f) - randomGrainSpeed);
@@ -217,8 +212,8 @@ void GranularEngine::loadSampleFromUrl(juce::URL &url)
     juce::AudioFormatReader *reader = formatManager.createReaderFor(url.createInputStream(false));
     if (reader != nullptr)
     {
-        sampleBuffer = new juce::AudioSampleBuffer(reader->numChannels, reader->lengthInSamples);
-        reader->read(sampleBuffer, 0, reader->lengthInSamples, 0, true, true);
+        sampleBuffer = new juce::AudioSampleBuffer(reader->numChannels, (int)reader->lengthInSamples);
+        reader->read(sampleBuffer, 0, (int)reader->lengthInSamples, 0, true, true);
         delete reader;
     }
 }

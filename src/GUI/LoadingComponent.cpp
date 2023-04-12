@@ -38,7 +38,8 @@ void LoadingComponent::loadFile()
     {
         auto *input = new juce::URLInputSource(fileChooser.getURLResult());
         waveForm.loadAudio(input);
-        processor.loadSampleFromUrl(fileChooser.getURLResult());
+        auto fileURL = fileChooser.getURLResult();
+        processor.loadSampleFromUrl(fileURL);
     }
 }
 
@@ -49,11 +50,11 @@ void LoadingComponent::changeListenerCallback(ChangeBroadcaster *source)
         waveForm.setRelativePosition(waveForm.getLastRelativeClick());
         if (waveForm.isLooping())
         {
-            processor.setSampleParameters(waveForm.getLastRelativeClick(), (waveForm.getLastRelativeClick() + waveForm.getRelativeLoopLength()));
+            processor.setSampleParameters((float)waveForm.getLastRelativeClick(), ((float)waveForm.getLastRelativeClick() + (float)waveForm.getRelativeLoopLength()));
         }
         else
         {
-            processor.setSampleParameters(waveForm.getLastRelativeClick(), waveForm.getLastRelativeClick());
+            processor.setSampleParameters((float)waveForm.getLastRelativeClick(), (float)waveForm.getLastRelativeClick());
         }
     }
 }

@@ -2,9 +2,7 @@
 
 /*
 TODO:
-- Add randomisation to all parameters
-- Add AMP envelopes (Start with ADSR)
-- Add reverse?
+- Add randomisation to this class
 */
 
 Grain::Grain()
