@@ -14,8 +14,7 @@ LoadingComponent::~LoadingComponent()
 
 void LoadingComponent::paint(juce::Graphics &g)
 {
-    g.fillAll(juce::Colours::black);
-    g.setColour(juce::Colours::white);
+    g.fillAll(juce::Colours::dimgrey);
 }
 
 void LoadingComponent::resized()

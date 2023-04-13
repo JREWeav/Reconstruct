@@ -3,10 +3,13 @@
 #include <JuceHeader.h>
 #include "LoadingComponent.h"
 #include "../AudioProcessing/PluginProcessor.h"
+#include "../LookAndFeel/ReconLookAndFeel.h"
+#include "EnvelopeGUI.h"
 
 class MainGUI : public juce::Component,
                 public juce::Button::Listener,
-                public juce::Slider::Listener
+                public juce::Slider::Listener,
+                public juce::ChangeListener
 {
 public:
     MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, AudioPluginAudioProcessor &p);
@@ -17,10 +20,10 @@ public:
     void buttonClicked(Button *) override;
     void sliderValueChanged(Slider *) override;
 
+    void changeListenerCallback(ChangeBroadcaster *source) override;
+
 private:
     LoadingComponent loadComponent;
-    juce::MidiKeyboardState keyboardState;
-    juce::MidiKeyboardComponent keyboardComponent{keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard};
     const int numVoices = 8;
     URL audioURL;
     AudioPluginAudioProcessor &processor;
@@ -48,6 +51,12 @@ private:
     juce::Label grainPanRandomnessLabel;
     juce::Slider grainVolumeRandomnessSlider;
     juce::Label grainVolumeRandomnessLabel;
+
+    // Look and feel
+    ReconLookAndFeel customLookAndFeel;
+
+    // Envelope
+    EnvelopeGUI envelope;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainGUI)
 };

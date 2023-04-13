@@ -33,12 +33,15 @@ void AudioWaveform::paint(juce::Graphics &g)
 {
     if (loaded)
     {
+        // Draw selection
         if (looping)
         {
-            g.setColour(Colours::cornflowerblue);
+            g.setColour(Colours::maroon);
             g.setOpacity(0.6);
             g.fillRect(lastRelativeClick * getWidth(), 0, loopRelativeLength * getWidth(), getHeight());
         }
+
+        // Draw Waveform
         g.setOpacity(1);
         g.setColour(Colours::aliceblue);
 
@@ -46,11 +49,12 @@ void AudioWaveform::paint(juce::Graphics &g)
         audioThumb.drawChannel(g, channelRect, 0, audioThumb.getTotalLength(), 0, 1.0f);
 
         // Draw Playhead
-        g.setColour(Colours::cyan);
+        g.setColour(Colours::red);
         g.drawRect((int)(curPos * getWidth()), 0, 2, getHeight());
 
         // Draw Time
-        g.setColour(Colours::black);
+        g.setOpacity(1);
+        g.setColour(Colours::slategrey);
         g.fillRect(0, 0, 100, 15);
         g.setColour(Colours::white);
         g.drawText(timeFromSecs(curPos * audioThumb.getTotalLength()) + "/" + timeFromSecs(audioThumb.getTotalLength()), 0, 0, 100, 15, Justification::centred);

@@ -65,6 +65,12 @@ public:
     void setRandomGrainSpeed(float _randomGrainSpeed);
     void setRandomGrainPan(float _randomGrainPan);
 
+    // Setters for envelope
+    void setEnvelopeParameters(int type, float attack, float peak, float decay, float sustain, float release);
+
+    // Setters for envelope
+    void setEnvelope(struct envelope);
+
 private:
     //==============================================================================
     std::vector<Grain *> grainPool;
@@ -97,6 +103,19 @@ private:
     int randomGrainLengthInMs;
     float randomGrainSpeed;
     float randomGrainPan;
+
+    // Envelope
+    struct Envelope
+    {
+        int type;
+        float attack;
+        float peak;
+        float decay;
+        float sustain;
+        float release;
+    };
+
+    Envelope envelope;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GranularEngine)
 };

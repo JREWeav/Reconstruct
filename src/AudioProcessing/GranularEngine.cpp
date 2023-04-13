@@ -86,7 +86,7 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
         if (grain->getGrainPlaybackPositionInSamples() == 0)
         {
             grain->setGrainSampleRate(storedSampleRate);
-            grain->initGrain(sampleBuffer);
+            grain->initGrain(sampleBuffer, envelope.type, envelope.attack, envelope.peak, envelope.decay, envelope.sustain, envelope.release);
         }
 
         grain->updateGrain(buffer, sampleBuffer);
@@ -203,6 +203,17 @@ void GranularEngine::setRandomGrainPan(float _randomGrainPan)
 void GranularEngine::setRandomGrainSpeed(float _randomGrainSpeed)
 {
     randomGrainSpeed = _randomGrainSpeed;
+}
+
+// Envelope
+void GranularEngine::setEnvelopeParameters(int type, float attack, float peak, float decay, float sustain, float release)
+{
+    envelope.type = type;
+    envelope.attack = attack;
+    envelope.peak = peak;
+    envelope.decay = decay;
+    envelope.sustain = sustain;
+    envelope.release = release;
 }
 
 //==============================================================================

@@ -47,6 +47,7 @@ public:
     void setGrainsPerSecond(float grainsPerSecond);
     void setGrainParameters(float randomGrainVolume, int grainLengthInMs, float grainSpeed, float grainPan);
     void setRandomParameters(float randomGrainVolume, int randomGrainLengthInMs, float randomGrainSpeed, float randomGrainPan);
+    void setEnvelopeParameters(int type, float attack, float peak, float decay, float sustain, float release);
 
     void setSampleParameters(float sampleStart, float sampleEnd);
 
@@ -55,5 +56,6 @@ private:
     juce::AudioFormatManager formatManager;
     GranularEngine granularEngine{formatManager};
     const int numVoices = 100;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
 };

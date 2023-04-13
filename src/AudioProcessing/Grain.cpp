@@ -29,7 +29,7 @@ Grain::~Grain()
 
 // Init grain
 
-void Grain::initGrain(AudioSampleBuffer *sampleBuffer)
+void Grain::initGrain(AudioSampleBuffer *sampleBuffer, int type, float attack, float peak, float decay, float sustain, float release)
 {
     const int numSamples = sampleBuffer->getNumSamples();
 
@@ -45,7 +45,8 @@ void Grain::initGrain(AudioSampleBuffer *sampleBuffer)
     grainEndPositionInSamples = grainStartPositionInSamples + grainLengthInSamples;
     grainEndPositionInSamples = jmin(grainEndPositionInSamples, numSamples);
     grainLengthInSamples = grainEndPositionInSamples - grainStartPositionInSamples;
-    generateEnvelope(0.1, 0.2, 0.5, 0.2, grainLengthInSamples, grainVolume);
+
+    generateEnvelope(type, attack, peak, decay, sustain, release, grainLengthInSamples);
 }
 
 void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sampleBuffer)
@@ -117,34 +118,27 @@ float Grain::cubicInterpolation(float x, float y0, float y1, float y2, float y3)
     return ((c3 * x + c2) * x + c1) * x + c0;
 }
 
-void Grain::generateEnvelope(float a, float d, float s, float r, int lengthInSamples, float peakVolume)
+void Grain::generateEnvelope(int type, float attack, float peak, float decay, float sustain, float release, int lengthInSamples)
 {
-    int attackSamples = (int)ceil(a * lengthInSamples);
-    int decaySamples = (int)ceil(d * lengthInSamples);
-    int releaseSamples = (int)ceil(r * lengthInSamples);
-    grainEnvelope.resize(lengthInSamples + 1);
-    for (int i = 0; i < lengthInSamples; i++)
+    if (type == 1)
     {
-        if (i < attackSamples)
-        {
-            grainEnvelope[i] = ((float)i / (float)attackSamples);
-        }
-        else if (i < attackSamples + decaySamples)
-        {
-            grainEnvelope[i] = (1.0f - (1.0f - s) * (i - attackSamples) / decaySamples);
-        }
-        else if (i < lengthInSamples - releaseSamples)
-        {
-            grainEnvelope[i] = (s);
-        }
-        else
-        {
-            grainEnvelope[i] = (s * (1.0f - (float)(i - (lengthInSamples - releaseSamples)) / (float)releaseSamples));
-        }
+        envelopeGenerator.generateADSR(&grainEnvelope, attack, peak, decay, sustain, release, lengthInSamples);
     }
-    for (int j = 0; j < 10; j++)
+    if (type == 2)
     {
-        DBG("Grain envelope: " << j << " " << String(grainEnvelope[lengthInSamples - 10 + j]));
+        envelopeGenerator.generateASR(&grainEnvelope, attack, sustain, release, lengthInSamples);
+    }
+    if (type == 3)
+    {
+        envelopeGenerator.generateHamming(&grainEnvelope, lengthInSamples);
+    }
+    if (type == 4)
+    {
+        envelopeGenerator.generateHann(&grainEnvelope, lengthInSamples);
+    }
+    if (type == 5)
+    {
+        envelopeGenerator.generateBlackman(&grainEnvelope, lengthInSamples);
     }
 }
 //----------------------------------------------------------------------------------------------
@@ -204,21 +198,6 @@ void Grain::setGrainRandomPosition(bool randomPosition)
 void Grain::setGrainRandomSpeed(bool randomSpeed)
 {
     grainRandomSpeed = randomSpeed;
-}
-
-void Grain::setGrainRandomPitch(bool randomPitch)
-{
-    grainRandomPitch = randomPitch;
-}
-
-void Grain::setGrainRandomLoop(bool randomLoop)
-{
-    grainRandomLoop = randomLoop;
-}
-
-void Grain::setGrainRandomReverse(bool randomReverse)
-{
-    grainRandomReverse = randomReverse;
 }
 
 void Grain::setGrainPan(float pan)

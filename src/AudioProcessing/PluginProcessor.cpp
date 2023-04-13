@@ -168,6 +168,11 @@ void AudioPluginAudioProcessor::setRandomParameters(float randomGrainVolume, int
     granularEngine.setRandomGrainPan(randomGrainPan);
 }
 
+void AudioPluginAudioProcessor::setEnvelopeParameters(int type, float attack, float peak, float decay, float sustain, float release)
+{
+    granularEngine.setEnvelopeParameters(type, attack, peak, decay, sustain, release);
+}
+
 void AudioPluginAudioProcessor::setSampleParameters(float sampleStart, float sampleEnd)
 {
     granularEngine.setRelativeSampleStart(sampleStart);
