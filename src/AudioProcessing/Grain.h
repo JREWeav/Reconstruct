@@ -34,6 +34,10 @@ public:
     float getGrainPitch();
     int getGrainPlaybackPositionInSamples();
     int getGrainLengthInSamples();
+    float getGrainCurrentRelativePosition();
+    float getGrainPlaybackRate();
+    float getGrainPan();
+    float getGrainCurrentVolume();
 
     // Other
     void initGrain(AudioSampleBuffer *sampleBuffer, int type, float attack, float peak, float decay, float sustain, float release);
@@ -52,6 +56,8 @@ private:
     float grainStartPosition;
     float grainPitch;
     float grainSampleRate;
+    float grainCurrentRelativePosition;
+    float grainCurrentVolume;
 
     // Randomization
     bool grainLoop;
@@ -70,6 +76,6 @@ private:
     int grainPlaybackPositionInSamples;
 
     // Envelope
-    EnvelopeGenerator envelopeGenerator;
+    std::unique_ptr<EnvelopeGenerator> envelopeGenerator;
     std::vector<float> grainEnvelope;
 };

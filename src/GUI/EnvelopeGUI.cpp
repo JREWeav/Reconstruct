@@ -21,17 +21,20 @@ EnvelopeGUI::~EnvelopeGUI()
 
 void EnvelopeGUI::paint(juce::Graphics &g)
 {
-    g.fillAll(juce::Colours::black);
+    g.fillAll(juce::Colours::aliceblue);
 
-    g.setColour(juce::Colours::white);
+    height = getHeight();
+    heightOffset = 21;
     if (!isCollapsed)
     {
+        g.setColour(juce::Colours::firebrick);
+        g.fillRect(0, 0, (int)getWidth(), (int)heightOffset - 4);
+        g.setColour(juce::Colours::aliceblue);
         g.drawLine(getWidth() - 17, 2, getWidth() - 2, 15, 2);
         g.drawLine(getWidth() - 2, 2, getWidth() - 17, 15, 2);
     }
+
     g.setColour(juce::Colours::red);
-    height = getHeight();
-    heightOffset = 4;
     if (isCollapsed)
     {
         heightOffset = (getHeight() / 5) + 4;

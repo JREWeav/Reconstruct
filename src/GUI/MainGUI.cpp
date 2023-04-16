@@ -123,6 +123,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     // Envelope
     addAndMakeVisible(envelope);
     envelope.addChangeListener(this);
+    envelope.setLookAndFeel(&customLookAndFeel);
 }
 
 MainGUI::~MainGUI()
@@ -162,12 +163,10 @@ void MainGUI::resized()
     // Envelope
     if (envelope.getCollapseState())
     {
-        DBG("Envelope collapsed");
         envelope.setBounds(getW * 24, getH * 13, getW * 7, getH * 4);
     }
     else
     {
-        DBG("Envelope expanded");
         envelope.setBounds(getW * 8, getH * 11, getW * 15, getH * 7);
     }
 }

@@ -87,3 +87,13 @@ void EnvelopeGenerator::generateBlackman(std::vector<float> *envelope, float tot
     std::fill(envelope->begin(), envelope->end(), 1);
     window.multiplyWithWindowingTable(envelope->data(), totalSamples);
 }
+
+void EnvelopeGenerator::generateWhiteNoise(std::vector<float> *envelope, float totalSamples)
+{
+    envelope->resize(totalSamples);
+    juce::Random rand;
+    for (int i = 0; i < totalSamples; i++)
+    {
+        envelope->at(i) = rand.nextFloat();
+    }
+}

@@ -23,6 +23,9 @@ public:
     void changeListenerCallback(ChangeBroadcaster *source) override;
 
 private:
+    // Look and feel
+    ReconLookAndFeel customLookAndFeel;
+
     LoadingComponent loadComponent;
     const int numVoices = 8;
     URL audioURL;
@@ -51,9 +54,6 @@ private:
     juce::Label grainPanRandomnessLabel;
     juce::Slider grainVolumeRandomnessSlider;
     juce::Label grainVolumeRandomnessLabel;
-
-    // Look and feel
-    ReconLookAndFeel customLookAndFeel;
 
     // Envelope
     EnvelopeGUI envelope;

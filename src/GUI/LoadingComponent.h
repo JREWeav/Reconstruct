@@ -6,7 +6,8 @@
 
 class LoadingComponent : public juce::Component,
                          public juce::Button::Listener,
-                         public juce::ChangeListener
+                         public juce::ChangeListener,
+                         public juce::Timer
 {
 public:
     LoadingComponent(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, AudioPluginAudioProcessor &p);
@@ -18,6 +19,9 @@ public:
     void buttonClicked(Button *) override;
 
     void changeListenerCallback(ChangeBroadcaster *source) override;
+
+    // Timer
+    void timerCallback() override;
 
 private:
     juce::FileChooser fileChooser{"Browse for sample to open..."};

@@ -179,6 +179,13 @@ void AudioPluginAudioProcessor::setSampleParameters(float sampleStart, float sam
     granularEngine.setRelativeSampleEnd(sampleEnd);
 }
 
+// Get grain parameters
+
+std::vector<std::tuple<float, float, float>> AudioPluginAudioProcessor::getGrainParameters()
+{
+    return granularEngine.getGrainParameters();
+}
+
 //==============================================================================
 bool AudioPluginAudioProcessor::hasEditor() const
 {

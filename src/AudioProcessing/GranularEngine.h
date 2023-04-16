@@ -71,6 +71,9 @@ public:
     // Setters for envelope
     void setEnvelope(struct envelope);
 
+    // Getter for grain pool
+    std::vector<std::tuple<float, float, float>> getGrainParameters();
+
 private:
     //==============================================================================
     std::vector<Grain *> grainPool;

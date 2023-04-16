@@ -32,7 +32,7 @@ public:
 private:
     juce::ComboBox envelopeType;
 
-    juce::StringArray envelopeTypes{"ADSR", "ASR", "Hamming", "Hann", "Blackman"};
+    juce::StringArray envelopeTypes{"ADSR", "ASR", "Hamming", "Hann", "Blackman", "White Noise"};
 
     bool isCollapsed = true;
 

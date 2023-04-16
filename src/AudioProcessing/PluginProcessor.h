@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "GranularEngine.h"
+#include "Grain.h"
 
 //==============================================================================
 class AudioPluginAudioProcessor : public juce::AudioProcessor
@@ -48,12 +49,15 @@ public:
     void setGrainParameters(float randomGrainVolume, int grainLengthInMs, float grainSpeed, float grainPan);
     void setRandomParameters(float randomGrainVolume, int randomGrainLengthInMs, float randomGrainSpeed, float randomGrainPan);
     void setEnvelopeParameters(int type, float attack, float peak, float decay, float sustain, float release);
-
     void setSampleParameters(float sampleStart, float sampleEnd);
+
+    // Get the parameters of the grains
+    std::vector<std::tuple<float, float, float>> getGrainParameters();
 
 private:
     //==============================================================================
     juce::AudioFormatManager formatManager;
+    std::vector<Grain *> grains;
     GranularEngine granularEngine{formatManager};
     const int numVoices = 100;
 

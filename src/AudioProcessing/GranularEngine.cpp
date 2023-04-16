@@ -216,6 +216,17 @@ void GranularEngine::setEnvelopeParameters(int type, float attack, float peak, f
     envelope.release = release;
 }
 
+// Getter for grain pool
+std::vector<std::tuple<float, float, float>> GranularEngine::getGrainParameters()
+{
+    std::vector<std::tuple<float, float, float>> grainParameters;
+    for (int i = 0; i < grainPool.size(); i++)
+    {
+        Grain *grain = grainPool[i];
+        grainParameters.push_back(std::make_tuple(grain->getGrainCurrentRelativePosition(), grain->getGrainCurrentVolume(), grain->getGrainPan()));
+    }
+    return grainParameters;
+}
 //==============================================================================
 
 void GranularEngine::loadSampleFromUrl(juce::URL &url)
