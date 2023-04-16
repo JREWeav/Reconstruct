@@ -6,7 +6,7 @@ LoadingComponent::LoadingComponent(AudioFormatManager &formatManager, AudioThumb
     addAndMakeVisible(waveForm);
     loadButton.addListener(this);
     waveForm.addChangeListener(this);
-    startTimerHz(2000);
+    startTimerHz(10000);
 }
 
 LoadingComponent::~LoadingComponent()

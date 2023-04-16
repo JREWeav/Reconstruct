@@ -18,4 +18,7 @@ public:
                            bool isSeparator, bool isActive, bool isHighlighted, bool isTicked, bool hasSubMenu,
                            const String &text, const String &shortcutKeyText,
                            const Drawable *icon, const Colour *textColour) override;
+
+    void drawButtonBackground(Graphics &, Button &, const Colour &backgroundColour,
+                              bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 };

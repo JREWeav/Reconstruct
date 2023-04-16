@@ -99,6 +99,7 @@ void ReconLookAndFeel::drawPopupMenuItem(Graphics &g, const Rectangle<int> &area
                                          const String &text, const String &shortcutKeyText,
                                          const Drawable *icon, const Colour *textColour)
 {
+    // Modified from original JUCE Code
     if (isSeparator)
     {
         auto r = area.reduced(5, 0);
@@ -178,4 +179,20 @@ void ReconLookAndFeel::drawPopupMenuItem(Graphics &g, const Rectangle<int> &area
             g.drawText(shortcutKeyText, r, Justification::centredRight, true);
         }
     }
+}
+
+void ReconLookAndFeel::drawButtonBackground(Graphics &g, Button &button, const Colour &backgroundColour,
+                                            bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+{
+    // Modified Juce Code
+
+    auto bounds = button.getLocalBounds().toFloat().reduced(0.5f, 0.5f);
+    auto colour = juce::Colours::firebrick;
+
+    if (button.isMouseOver())
+        colour = juce::Colours::red;
+
+    g.setColour(colour);
+
+    g.fillRect(bounds);
 }

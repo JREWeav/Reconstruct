@@ -65,7 +65,8 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
 
     for (int i = 0; i < heldNotes.size(); i++)
     {
-        timerForGrainGen += timePassed;
+        timerForGrainGen += buffer.getNumSamples();
+        grainInterval = storedSampleRate / grainsPerSecond;
         if (timerForGrainGen >= grainInterval)
         {
             int midiNoteNumber = heldNotes[i].getNoteNumber();
@@ -97,7 +98,6 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
             --i;
         }
     }
-
     processedSamples += numSamples;
 }
 
@@ -165,7 +165,7 @@ void GranularEngine::setRelativeSampleEnd(float end)
 void GranularEngine::setGrainsPerSecond(float hz)
 {
     grainsPerSecond = hz;
-    grainInterval = 1000 / grainsPerSecond;
+    // grainInterval = 1000.0f / grainsPerSecond;
 }
 
 // Grain parameters

@@ -7,7 +7,9 @@ TODO:
 
 MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, AudioPluginAudioProcessor &p) : loadComponent{formatManager, thumbnailCache, p}, processor{p}
 {
+    // Loading component
     addAndMakeVisible(loadComponent);
+    loadComponent.setLookAndFeel(&customLookAndFeel);
 
     // Grains per second
     addAndMakeVisible(grainsPerSecondSlider);
