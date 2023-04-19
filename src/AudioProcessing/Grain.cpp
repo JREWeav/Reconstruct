@@ -2,13 +2,12 @@
 
 /*
 TODO:
-- Add randomisation to all parameters
-- Add AMP envelopes (Start with ADSR)
-- Add reverse?
+- Add randomisation to this class
 */
 
 Grain::Grain()
 {
+    offsetComplete = false;
     grainPlaybackPositionInSamples = 0;
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -31,7 +30,7 @@ Grain::~Grain()
 
 // Init grain
 
-void Grain::initGrain(AudioSampleBuffer *sampleBuffer)
+void Grain::initGrain(AudioSampleBuffer *sampleBuffer, int type, float attack, float peak, float decay, float sustain, float release)
 {
     const int numSamples = sampleBuffer->getNumSamples();
 
@@ -41,25 +40,37 @@ void Grain::initGrain(AudioSampleBuffer *sampleBuffer)
     float grainSpeedInFloat = grainSpeed / 100.0f;
     grainPlaybackRate *= grainSpeedInFloat;
 
-    grainLengthInSamples = (int)ceil((grainSampleRate * (grainLengthInMs / 1000.0f)) * grainPlaybackRate);
+    // grainLengthInSamples = (int)ceil((grainSampleRate * (grainLengthInMs / 1000.0f)) * grainPlaybackRate);
+    grainLengthInSamples = (int)ceil((grainSampleRate * (grainLengthInMs / 1000.0f)));
     grainStartPositionInSamples = (int)ceil(grainStartPosition * numSamples);
     grainStartPositionInSamples = jmax(grainStartPositionInSamples, 1);
     grainEndPositionInSamples = grainStartPositionInSamples + grainLengthInSamples;
     grainEndPositionInSamples = jmin(grainEndPositionInSamples, numSamples);
     grainLengthInSamples = grainEndPositionInSamples - grainStartPositionInSamples;
-    generateEnvelope(0.1, 0.2, 0.5, 0.2, grainLengthInSamples, grainVolume);
+
+    generateEnvelope(type, attack, peak, decay, sustain, release, grainLengthInSamples);
 }
 
-void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sampleBuffer)
+void Grain::updateGrain(int numSamples, AudioSampleBuffer &audioBlock, AudioSampleBuffer *sampleBuffer)
 {
-    const int blockSamples = audioBlock.getNumSamples();
     const int samplesTotalSamples = sampleBuffer->getNumSamples();
     float grainVolumeInFloat = grainVolume / 100.0f;
-
-    // Get the sample data from the file
+    grainCurrentRelativePosition = (float)(grainStartPositionInSamples + grainPlaybackPositionInSamples) / (float)samplesTotalSamples;
+    grainCurrentVolume = grainVolumeInFloat * grainEnvelope[grainPlaybackPositionInSamples];
 
     int playbackAmount = grainLengthInSamples - grainPlaybackPositionInSamples;
-    playbackAmount = jmin(playbackAmount, blockSamples);
+    playbackAmount = jmin(playbackAmount, numSamples);
+    if (!offsetComplete)
+    {
+        if (numSamples > grainLengthInSamples - grainPlaybackPositionInSamples)
+        {
+            playbackAmount = grainLengthInSamples - grainPlaybackPositionInSamples;
+        }
+        else
+        {
+            playbackAmount -= grainOffsetInSamples;
+        }
+    }
 
     // Mix the grain's waveform with the output buffer
     for (int channel = 0; channel < audioBlock.getNumChannels(); ++channel)
@@ -67,6 +78,13 @@ void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sample
         const float *sampleData = sampleBuffer->getReadPointer(channel);
         float *outputData = audioBlock.getWritePointer(channel);
 
+        if (!offsetComplete)
+        {
+            for (int i = 0; i < grainOffsetInSamples; ++i)
+            {
+                outputData[i] += 0;
+            }
+        }
         for (int i = 0; i < playbackAmount; ++i)
         {
             if (grainPlaybackPositionInSamples + i >= grainLengthInSamples)
@@ -101,9 +119,17 @@ void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sample
                     nextSample *= grainPanR;
                 }
             }
-            outputData[i] += (nextSample * grainEnvelope[grainPlaybackPositionInSamples + i] * grainVolumeInFloat);
+            if (!offsetComplete)
+            {
+                outputData[i + grainOffsetInSamples] += (nextSample * grainEnvelope[grainPlaybackPositionInSamples + i] * grainVolumeInFloat);
+            }
+            else
+            {
+                outputData[i] += (nextSample * grainEnvelope[grainPlaybackPositionInSamples + i] * grainVolumeInFloat);
+            }
         }
     }
+    offsetComplete = true;
     grainPlaybackPositionInSamples += playbackAmount;
 }
 
@@ -119,34 +145,31 @@ float Grain::cubicInterpolation(float x, float y0, float y1, float y2, float y3)
     return ((c3 * x + c2) * x + c1) * x + c0;
 }
 
-void Grain::generateEnvelope(float a, float d, float s, float r, int lengthInSamples, float peakVolume)
+void Grain::generateEnvelope(int type, float attack, float peak, float decay, float sustain, float release, int lengthInSamples)
 {
-    int attackSamples = (int)ceil(a * lengthInSamples);
-    int decaySamples = (int)ceil(d * lengthInSamples);
-    int releaseSamples = (int)ceil(r * lengthInSamples);
-    grainEnvelope.resize(lengthInSamples + 1);
-    for (int i = 0; i < lengthInSamples; i++)
+    if (type == 1)
     {
-        if (i < attackSamples)
-        {
-            grainEnvelope[i] = ((float)i / (float)attackSamples);
-        }
-        else if (i < attackSamples + decaySamples)
-        {
-            grainEnvelope[i] = (1.0f - (1.0f - s) * (i - attackSamples) / decaySamples);
-        }
-        else if (i < lengthInSamples - releaseSamples)
-        {
-            grainEnvelope[i] = (s);
-        }
-        else
-        {
-            grainEnvelope[i] = (s * (1.0f - (float)(i - (lengthInSamples - releaseSamples)) / (float)releaseSamples));
-        }
+        envelopeGenerator->generateADSR(&grainEnvelope, attack, peak, decay, sustain, release, lengthInSamples);
     }
-    for (int j = 0; j < 10; j++)
+    if (type == 2)
     {
-        DBG("Grain envelope: " << j << " " << String(grainEnvelope[lengthInSamples - 10 + j]));
+        envelopeGenerator->generateASR(&grainEnvelope, attack, sustain, release, lengthInSamples);
+    }
+    if (type == 3)
+    {
+        envelopeGenerator->generateHamming(&grainEnvelope, lengthInSamples);
+    }
+    if (type == 4)
+    {
+        envelopeGenerator->generateHann(&grainEnvelope, lengthInSamples);
+    }
+    if (type == 5)
+    {
+        envelopeGenerator->generateBlackman(&grainEnvelope, lengthInSamples);
+    }
+    if (type == 6)
+    {
+        envelopeGenerator->generateWhiteNoise(&grainEnvelope, lengthInSamples);
     }
 }
 //----------------------------------------------------------------------------------------------
@@ -188,6 +211,11 @@ void Grain::setGrainLoop(bool loop)
     grainLoop = loop;
 }
 
+void Grain::setGrainOffsetInSamples(int offset)
+{
+    grainOffsetInSamples = offset;
+}
+
 void Grain::setGrainReverse(bool reverse)
 {
     grainReverse = reverse;
@@ -206,21 +234,6 @@ void Grain::setGrainRandomPosition(bool randomPosition)
 void Grain::setGrainRandomSpeed(bool randomSpeed)
 {
     grainRandomSpeed = randomSpeed;
-}
-
-void Grain::setGrainRandomPitch(bool randomPitch)
-{
-    grainRandomPitch = randomPitch;
-}
-
-void Grain::setGrainRandomLoop(bool randomLoop)
-{
-    grainRandomLoop = randomLoop;
-}
-
-void Grain::setGrainRandomReverse(bool randomReverse)
-{
-    grainRandomReverse = randomReverse;
 }
 
 void Grain::setGrainPan(float pan)
@@ -243,6 +256,26 @@ int Grain::getGrainLengthInSamples()
 float Grain::getGrainPitch()
 {
     return grainPitch;
+}
+
+float Grain::getGrainCurrentRelativePosition()
+{
+    return grainCurrentRelativePosition;
+}
+
+float Grain::getGrainPlaybackRate()
+{
+    return grainPlaybackRate;
+}
+
+float Grain::getGrainCurrentVolume()
+{
+    return grainCurrentVolume;
+}
+
+float Grain::getGrainPan()
+{
+    return grainPan;
 }
 
 //----------------------------------------------------------------------------------------------

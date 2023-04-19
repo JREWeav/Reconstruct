@@ -33,12 +33,15 @@ void AudioWaveform::paint(juce::Graphics &g)
 {
     if (loaded)
     {
+        // Draw selection
         if (looping)
         {
-            g.setColour(Colours::cornflowerblue);
+            g.setColour(Colours::maroon);
             g.setOpacity(0.6);
             g.fillRect(lastRelativeClick * getWidth(), 0, loopRelativeLength * getWidth(), getHeight());
         }
+
+        // Draw Waveform
         g.setOpacity(1);
         g.setColour(Colours::aliceblue);
 
@@ -46,11 +49,12 @@ void AudioWaveform::paint(juce::Graphics &g)
         audioThumb.drawChannel(g, channelRect, 0, audioThumb.getTotalLength(), 0, 1.0f);
 
         // Draw Playhead
-        g.setColour(Colours::cyan);
+        g.setColour(Colours::red);
         g.drawRect((int)(curPos * getWidth()), 0, 2, getHeight());
 
         // Draw Time
-        g.setColour(Colours::black);
+        g.setOpacity(1);
+        g.setColour(Colours::slategrey);
         g.fillRect(0, 0, 100, 15);
         g.setColour(Colours::white);
         g.drawText(timeFromSecs(curPos * audioThumb.getTotalLength()) + "/" + timeFromSecs(audioThumb.getTotalLength()), 0, 0, 100, 15, Justification::centred);
@@ -60,6 +64,41 @@ void AudioWaveform::paint(juce::Graphics &g)
         g.setColour(Colours::aliceblue);
         g.drawText("Audio Not Loaded", getLocalBounds(), Justification::centred);
     }
+    drawGrains(g);
+}
+
+void AudioWaveform::drawGrains(juce::Graphics &g)
+{
+    for (auto grain : grains)
+    {
+        g.setOpacity(0.3);
+        g.setColour(Colours::goldenrod);
+        float relativePosition = jmax(grain.relativePosition, 0.0f);
+        int x = (int)(grain.relativePosition * getWidth());
+        x = jmin(x, getWidth());
+        x = jmax(x, 0);
+        int y = (int)(getHeight() * (grain.pan / 100.0f));
+        y = jmin(y, getHeight());
+        y = jmax(y, 0);
+        float size = 20.0f * sqrt(grain.volume);
+        size = jmax(size, 0.0f);
+        if (size > 0)
+            g.fillEllipse(x, y, size, size);
+    }
+}
+
+void AudioWaveform::addGrain(float relativePosition, float volume, float pan)
+{
+    Grain grain;
+    grain.relativePosition = relativePosition;
+    grain.volume = volume;
+    grain.pan = pan;
+    grains.push_back(grain);
+}
+
+void AudioWaveform::clearGrains()
+{
+    grains.clear();
 }
 
 void AudioWaveform::resized()

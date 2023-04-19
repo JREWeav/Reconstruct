@@ -43,8 +43,6 @@ public:
     void setStateInformation(const void *data, int sizeInBytes) override;
     //==============================================================================
 
-    void generateGrain(int midiNoteNumber, float velocity);
-
     void loadSampleFromUrl(juce::URL &url);
 
     // Setters for sample parameters
@@ -65,14 +63,25 @@ public:
     void setRandomGrainSpeed(float _randomGrainSpeed);
     void setRandomGrainPan(float _randomGrainPan);
 
+    // Setters for envelope
+    void setEnvelopeParameters(int type, float attack, float peak, float decay, float sustain, float release);
+
+    // Setters for envelope
+    void setEnvelope(struct envelope);
+
+    // Getter for grain pool
+    std::vector<std::tuple<float, float, float>> getGrainParameters();
+
+    // Grain processing
+    void generateGrain(int midiNoteNumber, float velocity, int offsetInSamples);
+    void processActiveGrains(int numSamples, AudioSampleBuffer &buffer, AudioSampleBuffer *sampleBuffer);
+
 private:
     //==============================================================================
     std::vector<Grain *> grainPool;
     juce::AudioFormatManager &formatManager;
-    float timerForGrainGen;
-    float grainInterval;
     AudioSampleBuffer *sampleBuffer;
-    double storedSampleRate;
+    float storedSampleRate;
     int processedSamples;
 
     Random random;
@@ -85,6 +94,8 @@ private:
 
     // Grains per second
     float grainsPerSecond;
+    float lastGrainTime;
+    int grainTimerInSamples;
 
     // Grain parameters
     float grainVolume;
@@ -97,6 +108,19 @@ private:
     int randomGrainLengthInMs;
     float randomGrainSpeed;
     float randomGrainPan;
+
+    // Envelope
+    struct Envelope
+    {
+        int type;
+        float attack;
+        float peak;
+        float decay;
+        float sustain;
+        float release;
+    };
+
+    Envelope envelope;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GranularEngine)
 };

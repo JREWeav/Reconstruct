@@ -2,16 +2,13 @@
 
 //==============================================================================
 
-/*
-TODO:
-- Make all parameters controllable by the GUI
-*/
-
 GranularEngine::GranularEngine(juce::AudioFormatManager &formatManager)
     : AudioProcessor(BusesProperties()), formatManager(formatManager)
 {
-    timerForGrainGen = 0.0f;
     processedSamples = 0;
+
+    grainsPerSecond = 1;
+    grainTimerInSamples = 0;
 
     // Random Parameters
     randomGrainVolume = 0;
@@ -31,6 +28,7 @@ GranularEngine::~GranularEngine()
 void GranularEngine::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
     storedSampleRate = sampleRate;
+    juce::ignoreUnused(samplesPerBlock);
 }
 
 void GranularEngine::releaseResources()
@@ -40,11 +38,13 @@ void GranularEngine::releaseResources()
 
 void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMessages)
 {
-    // Your audio-processing code goes here!
-    // For more details, see the help for AudioProcessor::processBlock()
+    // Clear the buffer
+    buffer.clear();
+    // Get the number of samples in the buffer
     const int numSamples = buffer.getNumSamples();
-    const int numChannels = buffer.getNumChannels();
-    float timePassed = round(((float)numSamples / storedSampleRate) * 1000);
+    int samplesToProcess = numSamples;
+
+    int grainIntervalInSamples = (int)ceil(storedSampleRate / grainsPerSecond);
 
     for (const MidiMessageMetadata metadata : midiMessages)
     {
@@ -58,7 +58,7 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
             float velocity = message.getVelocity() / 127.0f;
 
             // Generate a new grain
-            generateGrain(midiNoteNumber, velocity);
+            generateGrain(midiNoteNumber, velocity, 0);
         }
         else if (metadata.getMessage().isNoteOff())
         {
@@ -68,21 +68,29 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
         }
     }
 
-    for (int i = 0; i < heldNotes.size(); i++)
+    for (int i = 0; i < numSamples; i++)
     {
-        timerForGrainGen += timePassed;
-        if (timerForGrainGen >= grainInterval)
+        if (grainIntervalInSamples > grainTimerInSamples)
         {
-            int midiNoteNumber = heldNotes[i].getNoteNumber();
-            float velocity = heldNotes[i].getVelocity() / 127.0f;
-            generateGrain(midiNoteNumber, velocity);
-            timerForGrainGen -= grainInterval;
+            grainTimerInSamples++;
+        }
+        else
+        {
+            for (int j = 0; j < heldNotes.size(); j++)
+            {
+                int midiNoteNumber = heldNotes[j].getNoteNumber();
+                float velocity = heldNotes[j].getVelocity() / 127.0f;
+                generateGrain(midiNoteNumber, velocity, i);
+            }
+            grainTimerInSamples -= grainIntervalInSamples;
         }
     }
+    processActiveGrains(numSamples, buffer, sampleBuffer);
+}
 
-    buffer.clear();
+void GranularEngine::processActiveGrains(int numSamples, AudioSampleBuffer &buffer, AudioSampleBuffer *_sampleBuffer)
+{
     // Loop through each Grain object
-
     for (int i = 0; i < grainPool.size(); ++i)
     {
         Grain *grain = grainPool[i];
@@ -91,25 +99,24 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
         if (grain->getGrainPlaybackPositionInSamples() == 0)
         {
             grain->setGrainSampleRate(storedSampleRate);
-            grain->initGrain(sampleBuffer);
+            grain->initGrain(sampleBuffer, envelope.type, envelope.attack, envelope.peak, envelope.decay, envelope.sustain, envelope.release);
         }
 
-        grain->updateGrain(buffer, sampleBuffer);
+        grain->updateGrain(numSamples, buffer, _sampleBuffer);
 
+        // Check if the grain has finished playing
         if (grain->getGrainPlaybackPositionInSamples() >= grain->getGrainLengthInSamples())
         {
             grainPool.erase(std::remove(grainPool.begin(), grainPool.end(), grain), grainPool.end());
             --i;
         }
     }
-
-    processedSamples += numSamples;
 }
 
-void GranularEngine::generateGrain(int midiNoteNumber, float velocity)
+void GranularEngine::generateGrain(int midiNoteNumber, float velocity, int offsetInSamples)
 {
     Grain *grain = new Grain();
-    grain->setGrainPitch(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber));
+    grain->setGrainPitch((float)juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber));
 
     // Set the grain's start position based off of waveform
     if (sampleStart == sampleEnd)
@@ -124,7 +131,7 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity)
 
     // Implement randomness
     float newGrainVolume = grainVolume + ((random.nextFloat() * randomGrainVolume * 2.0f) - randomGrainVolume);
-    newGrainVolume = jmax(0, (int)(jmin(150, (int)newGrainVolume)));
+    newGrainVolume = (float)jmax(0, (int)(jmin(150, (int)newGrainVolume)));
     int newGrainLengthInMs = grainLengthInMs + ((int)ceil(((random.nextFloat() * (float)randomGrainLengthInMs * 2.0f))) - randomGrainLengthInMs);
     newGrainLengthInMs = jmax(0, newGrainLengthInMs);
     float newGrainSpeed = grainSpeed + ((random.nextFloat() * randomGrainSpeed * 2.0f) - randomGrainSpeed);
@@ -135,6 +142,7 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity)
     if (newGrainLengthInMs == 0 || newGrainSpeed == 0 || newGrainVolume == 0)
         return;
 
+    grain->setGrainOffsetInSamples(offsetInSamples);
     grain->setGrainLengthInMs(newGrainLengthInMs);
     grain->setGrainPan(newGrainPan);
     grain->setGrainSpeed(newGrainSpeed);
@@ -170,7 +178,6 @@ void GranularEngine::setRelativeSampleEnd(float end)
 void GranularEngine::setGrainsPerSecond(float hz)
 {
     grainsPerSecond = hz;
-    grainInterval = 1000 / grainsPerSecond;
 }
 
 // Grain parameters
@@ -210,6 +217,29 @@ void GranularEngine::setRandomGrainSpeed(float _randomGrainSpeed)
     randomGrainSpeed = _randomGrainSpeed;
 }
 
+// Envelope
+void GranularEngine::setEnvelopeParameters(int type, float attack, float peak, float decay, float sustain, float release)
+{
+    envelope.type = type;
+    envelope.attack = attack;
+    envelope.peak = peak;
+    envelope.decay = decay;
+    envelope.sustain = sustain;
+    envelope.release = release;
+}
+
+// Getter for grain pool
+std::vector<std::tuple<float, float, float>> GranularEngine::getGrainParameters()
+{
+    std::vector<std::tuple<float, float, float>> grainParameters;
+    for (int i = 0; i < grainPool.size(); i++)
+    {
+        Grain *grain = grainPool[i];
+        grainParameters.push_back(std::make_tuple(grain->getGrainCurrentRelativePosition(), grain->getGrainCurrentVolume(), grain->getGrainPan()));
+    }
+    return grainParameters;
+}
+
 //==============================================================================
 
 void GranularEngine::loadSampleFromUrl(juce::URL &url)
@@ -217,8 +247,8 @@ void GranularEngine::loadSampleFromUrl(juce::URL &url)
     juce::AudioFormatReader *reader = formatManager.createReaderFor(url.createInputStream(false));
     if (reader != nullptr)
     {
-        sampleBuffer = new juce::AudioSampleBuffer(reader->numChannels, reader->lengthInSamples);
-        reader->read(sampleBuffer, 0, reader->lengthInSamples, 0, true, true);
+        sampleBuffer = new juce::AudioSampleBuffer(reader->numChannels, (int)reader->lengthInSamples);
+        reader->read(sampleBuffer, 0, (int)reader->lengthInSamples, 0, true, true);
         delete reader;
     }
 }

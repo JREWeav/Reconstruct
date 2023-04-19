@@ -1,40 +1,50 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "EnvelopeGenerator.h"
 
 class Grain
 {
 public:
     Grain();
     ~Grain();
-    // Setters
-    void setGrainLengthInMs(int length);
+    // Start Position
     void setGrainStartPosition(float position);
-    void setGrainVolume(float volume);
-    void setGrainPitch(float pitch);
-    void setGrainSpeed(float speed);
     void setGrainSampleRate(float sampleRate);
     void setGrainLoop(bool loop);
-    void setGrainReverse(bool reverse);
+    void setGrainPitch(float pitch);
+    void setGrainOffsetInSamples(int offsetInSamples);
+
+    // Grain Params
+    void setGrainLengthInMs(int length);
+    void setGrainVolume(float volume);
+    void setGrainSpeed(float speed);
+    void setGrainPan(float pan);
+
+    // Randomness
     void setGrainRandomLength(bool randomLength);
     void setGrainRandomPosition(bool randomPosition);
     void setGrainRandomSpeed(bool randomSpeed);
-    void setGrainRandomPitch(bool randomPitch);
-    void setGrainRandomLoop(bool randomLoop);
-    void setGrainRandomReverse(bool randomReverse);
-    void setGrainPan(float pan);
+    void setGrainRandomPan(bool randomPan);
+
+    // Reverse
+    void setGrainReverse(bool reverse);
 
     // Getters
     float getGrainLengthInMs();
     float getGrainPitch();
     int getGrainPlaybackPositionInSamples();
     int getGrainLengthInSamples();
+    float getGrainCurrentRelativePosition();
+    float getGrainPlaybackRate();
+    float getGrainPan();
+    float getGrainCurrentVolume();
 
     // Other
-    void initGrain(AudioSampleBuffer *sampleBuffer);
-    void updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sampleBuffer);
+    void initGrain(AudioSampleBuffer *sampleBuffer, int type, float attack, float peak, float decay, float sustain, float release);
+    void updateGrain(int numSamples, AudioSampleBuffer &audioBlock, AudioSampleBuffer *sampleBuffer);
     float cubicInterpolation(float x, float y0, float y1, float y2, float y3);
-    void generateEnvelope(float a, float d, float s, float r, int lengthInSamples, float peakVolume);
+    void generateEnvelope(int type, float attack, float peak, float decay, float sustain, float release, int lengthInSamples);
 
 private:
     // Grain parameters
@@ -47,6 +57,9 @@ private:
     float grainStartPosition;
     float grainPitch;
     float grainSampleRate;
+    float grainCurrentRelativePosition;
+    float grainCurrentVolume;
+    bool offsetComplete;
 
     // Randomization
     bool grainLoop;
@@ -63,7 +76,9 @@ private:
     int grainEndPositionInSamples;
     int grainLengthInSamples;
     int grainPlaybackPositionInSamples;
+    int grainOffsetInSamples;
 
     // Envelope
+    std::unique_ptr<EnvelopeGenerator> envelopeGenerator;
     std::vector<float> grainEnvelope;
 };

@@ -4,7 +4,7 @@ set (TargetName Reconstruct)
 set (CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 project(RECONSTRUCT 
-        VERSION 0.0.1
+        VERSION 0.5.1
         LANGUAGES CXX
         DESCRIPTION "Reconstruct is a plugin for Granular Synthesis")
 
@@ -16,8 +16,7 @@ juce_add_plugin(${TargetName}
     COMPANY_NAME "Justin Weaver"
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
-    NEEDS_MIDI_OUTPUT TRUE
-    # IS_MIDI_EFFECT TRUE/FALSE                 
+    NEEDS_MIDI_OUTPUT FALSE                
     EDITOR_WANTS_KEYBOARD_FOCUS TRUE
     COPY_PLUGIN_AFTER_BUILD TRUE
     PLUGIN_MANUFACTURER_CODE JuWe
@@ -33,11 +32,15 @@ target_sources(${TargetName}
         ./src/AudioProcessing/Grain.cpp
         ./src/AudioProcessing/GranularEngine.cpp
         ./src/AudioProcessing/PluginProcessor.cpp
+        ./src/AudioProcessing/EnvelopeGenerator.cpp
 
         ./src/GUI/AudioWaveform.cpp
+        ./src/GUI/EnvelopeGUI.cpp
         ./src/GUI/LoadingComponent.cpp
         ./src/GUI/MainGUI.cpp
         ./src/GUI/PluginEditor.cpp
+
+        ./src/LookAndFeel/ReconLookAndFeel.cpp
         )
 
 target_compile_definitions(${TargetName}

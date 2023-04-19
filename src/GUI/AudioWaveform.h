@@ -34,6 +34,11 @@ public:
     void mouseDown(const MouseEvent &event) override;
     void mouseDrag(const MouseEvent &event) override;
 
+    // Grain drawing
+    void drawGrains(juce::Graphics &g);
+    void addGrain(float relativePosition, float pan, float volume);
+    void clearGrains();
+
     //==============================================================================
     void paint(juce::Graphics &) override;
     void resized() override;
@@ -45,10 +50,20 @@ private:
 
     juce::AudioThumbnail audioThumb;
 
+    struct Grain
+    {
+        float relativePosition;
+        float pan;
+        float volume;
+    };
+
+    std::vector<Grain> grains;
+
     bool loaded;
     bool looping;
     double loopRelativeLength;
     double curPos;
     double lastRelativeClick;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioWaveform)
 };
