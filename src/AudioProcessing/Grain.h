@@ -13,6 +13,7 @@ public:
     void setGrainSampleRate(float sampleRate);
     void setGrainLoop(bool loop);
     void setGrainPitch(float pitch);
+    void setGrainOffsetInSamples(int offsetInSamples);
 
     // Grain Params
     void setGrainLengthInMs(int length);
@@ -41,7 +42,7 @@ public:
 
     // Other
     void initGrain(AudioSampleBuffer *sampleBuffer, int type, float attack, float peak, float decay, float sustain, float release);
-    void updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sampleBuffer);
+    void updateGrain(int numSamples, AudioSampleBuffer &audioBlock, AudioSampleBuffer *sampleBuffer);
     float cubicInterpolation(float x, float y0, float y1, float y2, float y3);
     void generateEnvelope(int type, float attack, float peak, float decay, float sustain, float release, int lengthInSamples);
 
@@ -58,6 +59,7 @@ private:
     float grainSampleRate;
     float grainCurrentRelativePosition;
     float grainCurrentVolume;
+    bool offsetComplete;
 
     // Randomization
     bool grainLoop;
@@ -74,6 +76,7 @@ private:
     int grainEndPositionInSamples;
     int grainLengthInSamples;
     int grainPlaybackPositionInSamples;
+    int grainOffsetInSamples;
 
     // Envelope
     std::unique_ptr<EnvelopeGenerator> envelopeGenerator;

@@ -6,7 +6,7 @@ LoadingComponent::LoadingComponent(AudioFormatManager &formatManager, AudioThumb
     addAndMakeVisible(waveForm);
     loadButton.addListener(this);
     waveForm.addChangeListener(this);
-    startTimerHz(10000);
+    startTimerHz(2000);
 }
 
 LoadingComponent::~LoadingComponent()
@@ -61,17 +61,17 @@ void LoadingComponent::changeListenerCallback(ChangeBroadcaster *source)
 
 void LoadingComponent::timerCallback()
 {
-    waveForm.clearGrains();
-    auto grainParameters = processor.getGrainParameters();
-    repaint();
-    if (grainParameters.size() == 0)
-        return;
+    // waveForm.clearGrains();
+    // auto grainParameters = processor.getGrainParameters();
+    // repaint();
+    // if (grainParameters.size() == 0)
+    //     return;
 
-    for (int i = 0; i < grainParameters.size(); i++)
-    {
-        float grainCurrentPosition = std::get<0>(grainParameters[i]);
-        float grainVolume = std::get<1>(grainParameters[i]);
-        float grainPan = std::get<2>(grainParameters[i]);
-        waveForm.addGrain(grainCurrentPosition, grainVolume, grainPan);
-    }
+    // for (int i = 0; i < grainParameters.size(); i++)
+    // {
+    //     float grainCurrentPosition = std::get<0>(grainParameters[i]);
+    //     float grainVolume = std::get<1>(grainParameters[i]);
+    //     float grainPan = std::get<2>(grainParameters[i]);
+    //     waveForm.addGrain(grainCurrentPosition, grainVolume, grainPan);
+    // }
 }

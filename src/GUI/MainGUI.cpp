@@ -2,7 +2,6 @@
 
 /*
 TODO:
-- Hook up the keyboard component to the synth
 */
 
 MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, AudioPluginAudioProcessor &p) : loadComponent{formatManager, thumbnailCache, p}, processor{p}

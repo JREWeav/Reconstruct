@@ -7,6 +7,7 @@ TODO:
 
 Grain::Grain()
 {
+    offsetComplete = false;
     grainPlaybackPositionInSamples = 0;
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
@@ -50,18 +51,26 @@ void Grain::initGrain(AudioSampleBuffer *sampleBuffer, int type, float attack, f
     generateEnvelope(type, attack, peak, decay, sustain, release, grainLengthInSamples);
 }
 
-void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sampleBuffer)
+void Grain::updateGrain(int numSamples, AudioSampleBuffer &audioBlock, AudioSampleBuffer *sampleBuffer)
 {
-    const int blockSamples = audioBlock.getNumSamples();
     const int samplesTotalSamples = sampleBuffer->getNumSamples();
     float grainVolumeInFloat = grainVolume / 100.0f;
     grainCurrentRelativePosition = (float)(grainStartPositionInSamples + grainPlaybackPositionInSamples) / (float)samplesTotalSamples;
     grainCurrentVolume = grainVolumeInFloat * grainEnvelope[grainPlaybackPositionInSamples];
 
-    // Get the sample data from the file
-
     int playbackAmount = grainLengthInSamples - grainPlaybackPositionInSamples;
-    playbackAmount = jmin(playbackAmount, blockSamples);
+    playbackAmount = jmin(playbackAmount, numSamples);
+    if (!offsetComplete)
+    {
+        if (numSamples > grainLengthInSamples - grainPlaybackPositionInSamples)
+        {
+            playbackAmount = grainLengthInSamples - grainPlaybackPositionInSamples;
+        }
+        else
+        {
+            playbackAmount -= grainOffsetInSamples;
+        }
+    }
 
     // Mix the grain's waveform with the output buffer
     for (int channel = 0; channel < audioBlock.getNumChannels(); ++channel)
@@ -69,6 +78,13 @@ void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sample
         const float *sampleData = sampleBuffer->getReadPointer(channel);
         float *outputData = audioBlock.getWritePointer(channel);
 
+        if (!offsetComplete)
+        {
+            for (int i = 0; i < grainOffsetInSamples; ++i)
+            {
+                outputData[i] += 0;
+            }
+        }
         for (int i = 0; i < playbackAmount; ++i)
         {
             if (grainPlaybackPositionInSamples + i >= grainLengthInSamples)
@@ -103,9 +119,17 @@ void Grain::updateGrain(AudioSampleBuffer &audioBlock, AudioSampleBuffer *sample
                     nextSample *= grainPanR;
                 }
             }
-            outputData[i] += (nextSample * grainEnvelope[grainPlaybackPositionInSamples + i] * grainVolumeInFloat);
+            if (!offsetComplete)
+            {
+                outputData[i + grainOffsetInSamples] += (nextSample * grainEnvelope[grainPlaybackPositionInSamples + i] * grainVolumeInFloat);
+            }
+            else
+            {
+                outputData[i] += (nextSample * grainEnvelope[grainPlaybackPositionInSamples + i] * grainVolumeInFloat);
+            }
         }
     }
+    offsetComplete = true;
     grainPlaybackPositionInSamples += playbackAmount;
 }
 
@@ -185,6 +209,11 @@ void Grain::setGrainPitch(float pitch)
 void Grain::setGrainLoop(bool loop)
 {
     grainLoop = loop;
+}
+
+void Grain::setGrainOffsetInSamples(int offset)
+{
+    grainOffsetInSamples = offset;
 }
 
 void Grain::setGrainReverse(bool reverse)

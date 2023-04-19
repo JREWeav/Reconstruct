@@ -43,8 +43,6 @@ public:
     void setStateInformation(const void *data, int sizeInBytes) override;
     //==============================================================================
 
-    void generateGrain(int midiNoteNumber, float velocity);
-
     void loadSampleFromUrl(juce::URL &url);
 
     // Setters for sample parameters
@@ -74,12 +72,14 @@ public:
     // Getter for grain pool
     std::vector<std::tuple<float, float, float>> getGrainParameters();
 
+    // Grain processing
+    void generateGrain(int midiNoteNumber, float velocity, int offsetInSamples);
+    void processActiveGrains(int numSamples, AudioSampleBuffer &buffer, AudioSampleBuffer *sampleBuffer);
+
 private:
     //==============================================================================
     std::vector<Grain *> grainPool;
     juce::AudioFormatManager &formatManager;
-    float timerForGrainGen;
-    float grainInterval;
     AudioSampleBuffer *sampleBuffer;
     float storedSampleRate;
     int processedSamples;
@@ -94,6 +94,8 @@ private:
 
     // Grains per second
     float grainsPerSecond;
+    float lastGrainTime;
+    int grainTimerInSamples;
 
     // Grain parameters
     float grainVolume;
