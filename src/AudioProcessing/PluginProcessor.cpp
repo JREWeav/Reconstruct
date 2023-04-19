@@ -86,7 +86,7 @@ void AudioPluginAudioProcessor::changeProgramName(int index, const juce::String 
 //==============================================================================
 void AudioPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    granularEngine.prepareToPlay(sampleRate, samplesPerBlock);
+    granularEngines->prepareToPlay(sampleRate, samplesPerBlock);
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -137,53 +137,7 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, j
     for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    granularEngine.processBlock(buffer, midiMessages);
-}
-
-//================
-
-void AudioPluginAudioProcessor::loadSampleFromUrl(juce::URL &url)
-{
-    granularEngine.loadSampleFromUrl(url);
-}
-
-void AudioPluginAudioProcessor::setGrainsPerSecond(float grainsPerSecond)
-{
-    granularEngine.setGrainsPerSecond(grainsPerSecond);
-}
-
-void AudioPluginAudioProcessor::setGrainParameters(float grainVolume, int grainLengthInMs, float grainPan, float grainSpeed)
-{
-    granularEngine.setGrainVolume(grainVolume);
-    granularEngine.setGrainLengthInMs(grainLengthInMs);
-    granularEngine.setGrainPan(grainPan);
-    granularEngine.setGrainSpeed(grainSpeed);
-}
-
-void AudioPluginAudioProcessor::setRandomParameters(float randomGrainVolume, int randomGrainLengthInMs, float randomGrainSpeed, float randomGrainPan)
-{
-    granularEngine.setRandomGrainVolume(randomGrainVolume);
-    granularEngine.setRandomGrainLengthInMs(randomGrainLengthInMs);
-    granularEngine.setRandomGrainSpeed(randomGrainSpeed);
-    granularEngine.setRandomGrainPan(randomGrainPan);
-}
-
-void AudioPluginAudioProcessor::setEnvelopeParameters(int type, float attack, float peak, float decay, float sustain, float release)
-{
-    granularEngine.setEnvelopeParameters(type, attack, peak, decay, sustain, release);
-}
-
-void AudioPluginAudioProcessor::setSampleParameters(float sampleStart, float sampleEnd)
-{
-    granularEngine.setRelativeSampleStart(sampleStart);
-    granularEngine.setRelativeSampleEnd(sampleEnd);
-}
-
-// Get grain parameters
-
-std::vector<std::tuple<float, float, float>> AudioPluginAudioProcessor::getGrainParameters()
-{
-    return granularEngine.getGrainParameters();
+    granularEngines->processBlock(buffer, midiMessages);
 }
 
 //==============================================================================
@@ -194,7 +148,7 @@ bool AudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor *AudioPluginAudioProcessor::createEditor()
 {
-    return new AudioPluginAudioProcessorEditor(*this, formatManager);
+    return new AudioPluginAudioProcessorEditor(*this, granularEngines, formatManager);
 }
 
 //==============================================================================

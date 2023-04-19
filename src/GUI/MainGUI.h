@@ -1,10 +1,8 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "LoadingComponent.h"
-#include "../AudioProcessing/PluginProcessor.h"
-#include "../LookAndFeel/ReconLookAndFeel.h"
 #include "EnvelopeGUI.h"
+#include "../AudioProcessing/GranularEngine.h"
 
 class MainGUI : public juce::Component,
                 public juce::Button::Listener,
@@ -12,7 +10,7 @@ class MainGUI : public juce::Component,
                 public juce::ChangeListener
 {
 public:
-    MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, AudioPluginAudioProcessor &p);
+    MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, GranularEngine &g);
     ~MainGUI() override;
 
     void paint(juce::Graphics &) override;
@@ -24,12 +22,9 @@ public:
 
 private:
     // Look and feel
-    ReconLookAndFeel customLookAndFeel;
-
-    LoadingComponent loadComponent;
     const int numVoices = 8;
     URL audioURL;
-    AudioPluginAudioProcessor &processor;
+    GranularEngine &engine;
 
     // Grains per second
     juce::Slider grainsPerSecondSlider;

@@ -1,14 +1,17 @@
 #pragma once
 
 #include "../AudioProcessing/PluginProcessor.h"
+#include "../AudioProcessing/GranularEngine.h"
 #include <JuceHeader.h>
 #include "MainGUI.h"
+#include "LoadingComponent.h"
+#include "../LookAndFeel/ReconLookAndFeel.h"
 
 //==============================================================================
 class AudioPluginAudioProcessorEditor : public juce::AudioProcessorEditor
 {
 public:
-    explicit AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &, juce::AudioFormatManager &formatManager);
+    explicit AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &, GranularEngine *, AudioFormatManager &);
     ~AudioPluginAudioProcessorEditor() override;
 
     //==============================================================================
@@ -18,9 +21,11 @@ public:
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    AudioPluginAudioProcessor &processor;
-    juce::AudioThumbnailCache thumbnailCache{10000};
-    MainGUI mainComponent;
+    ReconLookAndFeel customLookAndFeel;
+    AudioThumbnailCache thumbnailCache{10000};
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessorEditor)
+    MainGUI mainComponent;
+    LoadingComponent loadComponent;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessorEditor)
 };

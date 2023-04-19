@@ -1,6 +1,6 @@
 #include "LoadingComponent.h"
 
-LoadingComponent::LoadingComponent(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, AudioPluginAudioProcessor &p) : waveForm{formatManager, thumbnailCache}, processor(p)
+LoadingComponent::LoadingComponent(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, GranularEngine *g) : waveForm{formatManager, thumbnailCache}, engines(g)
 {
     addAndMakeVisible(loadButton);
     addAndMakeVisible(waveForm);
@@ -39,7 +39,7 @@ void LoadingComponent::loadFile()
         auto *input = new juce::URLInputSource(fileChooser.getURLResult());
         waveForm.loadAudio(input);
         auto fileURL = fileChooser.getURLResult();
-        processor.loadSampleFromUrl(fileURL);
+        engines->loadSampleFromUrl(fileURL);
     }
 }
 
@@ -50,28 +50,30 @@ void LoadingComponent::changeListenerCallback(ChangeBroadcaster *source)
         waveForm.setRelativePosition(waveForm.getLastRelativeClick());
         if (waveForm.isLooping())
         {
-            processor.setSampleParameters((float)waveForm.getLastRelativeClick(), ((float)waveForm.getLastRelativeClick() + (float)waveForm.getRelativeLoopLength()));
+            engines->setRelativeSampleStart((float)waveForm.getLastRelativeClick());
+            engines->setRelativeSampleEnd((float)waveForm.getLastRelativeClick() + (float)waveForm.getRelativeLoopLength());
         }
         else
         {
-            processor.setSampleParameters((float)waveForm.getLastRelativeClick(), (float)waveForm.getLastRelativeClick());
+            engines->setRelativeSampleStart((float)waveForm.getLastRelativeClick());
+            engines->setRelativeSampleEnd((float)waveForm.getLastRelativeClick());
         }
     }
 }
 
 void LoadingComponent::timerCallback()
 {
-    // waveForm.clearGrains();
-    // auto grainParameters = processor.getGrainParameters();
-    // repaint();
-    // if (grainParameters.size() == 0)
-    //     return;
+    waveForm.clearGrains();
+    auto grainParameters = engines->getGrainParameters();
+    repaint();
+    if (grainParameters.size() == 0)
+        return;
 
-    // for (int i = 0; i < grainParameters.size(); i++)
-    // {
-    //     float grainCurrentPosition = std::get<0>(grainParameters[i]);
-    //     float grainVolume = std::get<1>(grainParameters[i]);
-    //     float grainPan = std::get<2>(grainParameters[i]);
-    //     waveForm.addGrain(grainCurrentPosition, grainVolume, grainPan);
-    // }
+    for (int i = 0; i < grainParameters.size(); i++)
+    {
+        float grainCurrentPosition = std::get<0>(grainParameters[i]);
+        float grainVolume = std::get<1>(grainParameters[i]);
+        float grainPan = std::get<2>(grainParameters[i]);
+        waveForm.addGrain(grainCurrentPosition, grainVolume, grainPan);
+    }
 }

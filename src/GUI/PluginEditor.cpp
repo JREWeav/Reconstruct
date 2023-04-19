@@ -2,13 +2,17 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p, juce::AudioFormatManager &formatManager)
-    : AudioProcessorEditor(&p), processor(p), mainComponent(formatManager, thumbnailCache, processor)
+AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p, GranularEngine *granularEngines, AudioFormatManager &formatManager)
+    : AudioProcessorEditor(&p), mainComponent(formatManager, thumbnailCache, granularEngines[0]), loadComponent(formatManager, thumbnailCache, granularEngines)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     setSize(1200, 750);
     addAndMakeVisible(mainComponent);
+    mainComponent.setLookAndFeel(&customLookAndFeel);
+    addAndMakeVisible(loadComponent);
+    loadComponent.setLookAndFeel(&customLookAndFeel);
+
     formatManager.registerBasicFormats();
 }
 
@@ -25,5 +29,6 @@ void AudioPluginAudioProcessorEditor::paint(juce::Graphics &g)
 
 void AudioPluginAudioProcessorEditor::resized()
 {
-    mainComponent.setBounds(getLocalBounds());
+    loadComponent.setBounds(0, 0, getWidth(), getHeight() / 2);
+    mainComponent.setBounds(0, getHeight() / 2, getWidth(), getHeight() / 2);
 }
