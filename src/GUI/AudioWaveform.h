@@ -12,6 +12,7 @@
     your controls and content.
 */
 class AudioWaveform : public juce::Component,
+                      public juce::Slider::Listener,
                       public juce::ChangeListener,
                       public juce::ChangeBroadcaster
 {
@@ -39,6 +40,9 @@ public:
     void addGrain(float relativePosition, float pan, float volume);
     void clearGrains();
 
+    // Slider logic
+    void sliderValueChanged(Slider *slider) override;
+
     //==============================================================================
     void paint(juce::Graphics &) override;
     void resized() override;
@@ -49,6 +53,9 @@ private:
     String timeFromSecs(double seconds);
 
     juce::AudioThumbnail audioThumb;
+
+    juce::Slider loopStartSlider;
+    juce::Slider loopEndSlider;
 
     struct Grain
     {

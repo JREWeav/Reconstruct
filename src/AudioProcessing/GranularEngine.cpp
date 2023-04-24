@@ -15,12 +15,16 @@ GranularEngine::GranularEngine(juce::AudioFormatManager &formatManager)
     randomGrainLengthInMs = 0;
     randomGrainSpeed = 0;
     randomGrainPan = 0;
+
+    fileLoaded = false;
 }
 
 GranularEngine::~GranularEngine()
 {
-    sampleBuffer->clear();
-    delete sampleBuffer;
+    if (sampleBuffer != nullptr)
+    {
+        sampleBuffer->clear();
+    }
 }
 
 //==============================================================================
@@ -38,6 +42,11 @@ void GranularEngine::releaseResources()
 
 void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMessages)
 {
+    if (!fileLoaded)
+        return;
+
+    // Get the number of samples in the buffer
+    storedBufferSize = buffer.getNumSamples();
     // Clear the buffer
     buffer.clear();
     // Get the number of samples in the buffer
@@ -85,7 +94,11 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
             grainTimerInSamples -= grainIntervalInSamples;
         }
     }
-    processActiveGrains(numSamples, buffer, sampleBuffer);
+    if (grainPool.size() > 0)
+    {
+        processActiveGrains(numSamples, buffer, sampleBuffer);
+    }
+    sendChangeMessage();
 }
 
 void GranularEngine::processActiveGrains(int numSamples, AudioSampleBuffer &buffer, AudioSampleBuffer *_sampleBuffer)
@@ -130,13 +143,52 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity, int offse
     }
 
     // Implement randomness
-    float newGrainVolume = grainVolume + ((random.nextFloat() * randomGrainVolume * 2.0f) - randomGrainVolume);
+    // Randomness for volume
+    float newGrainVolume = grainVolume + (random.nextFloat() * randomGrainVolume);
+    if (randomGrainVolumeState == 2)
+    {
+        newGrainVolume *= -1.0f;
+    }
+    else if (randomGrainVolumeState == 0)
+    {
+        newGrainVolume = grainVolume + ((random.nextFloat() * randomGrainVolume * 2.0f) - randomGrainVolume);
+    }
     newGrainVolume = (float)jmax(0, (int)(jmin(150, (int)newGrainVolume)));
-    int newGrainLengthInMs = grainLengthInMs + ((int)ceil(((random.nextFloat() * (float)randomGrainLengthInMs * 2.0f))) - randomGrainLengthInMs);
+
+    // Randomness for Length
+    int newGrainLengthInMs = grainLengthInMs + (int)ceil(random.nextFloat() * (float)randomGrainLengthInMs);
+    if (randomGrainLengthState == 2)
+    {
+        newGrainLengthInMs *= -1;
+    }
+    else if (randomGrainLengthState == 0)
+    {
+        newGrainLengthInMs = grainLengthInMs + ((int)ceil(((random.nextFloat() * (float)randomGrainLengthInMs * 2.0f))) - randomGrainLengthInMs);
+    }
     newGrainLengthInMs = jmax(0, newGrainLengthInMs);
-    float newGrainSpeed = grainSpeed + ((random.nextFloat() * randomGrainSpeed * 2.0f) - randomGrainSpeed);
+
+    // Randomness for Speed
+    float newGrainSpeed = grainSpeed + ((random.nextFloat() * randomGrainSpeed));
+    if (randomGrainSpeedState == 2)
+    {
+        newGrainSpeed *= -1.0f;
+    }
+    else if (randomGrainSpeedState == 1)
+    {
+        newGrainSpeed = grainSpeed + ((random.nextFloat() * randomGrainSpeed * 2.0f) - randomGrainSpeed);
+    }
     newGrainSpeed = jmax(0.0f, newGrainSpeed);
-    float newGrainPan = grainPan + ((random.nextFloat() * randomGrainPan * 2.0f) - randomGrainPan);
+
+    // Randomness for Pan
+    float newGrainPan = grainPan + ((random.nextFloat() * randomGrainPan));
+    if (randomGrainPanState == 2)
+    {
+        newGrainPan *= -1.0f;
+    }
+    else if (randomGrainPanState == 0)
+    {
+        newGrainPan = grainPan + ((random.nextFloat() * randomGrainPan * 2.0f) - randomGrainPan);
+    }
     newGrainPan = jmax(0.0f, jmin(100.0f, newGrainPan));
 
     if (newGrainLengthInMs == 0 || newGrainSpeed == 0 || newGrainVolume == 0)
@@ -200,21 +252,25 @@ void GranularEngine::setGrainSpeed(float _grainSpeed)
 
 // Randomness parameters
 
-void GranularEngine::setRandomGrainVolume(float _randomGrainVolume)
+void GranularEngine::setRandomGrainVolume(float _randomGrainVolume, int dir)
 {
     randomGrainVolume = _randomGrainVolume;
+    randomGrainVolumeState = dir;
 }
-void GranularEngine::setRandomGrainLengthInMs(int _randomGrainLengthInMs)
+void GranularEngine::setRandomGrainLengthInMs(int _randomGrainLengthInMs, int dir)
 {
     randomGrainLengthInMs = _randomGrainLengthInMs;
+    randomGrainLengthState = dir;
 }
-void GranularEngine::setRandomGrainPan(float _randomGrainPan)
+void GranularEngine::setRandomGrainPan(float _randomGrainPan, int dir)
 {
     randomGrainPan = _randomGrainPan;
+    randomGrainPanState = dir;
 }
-void GranularEngine::setRandomGrainSpeed(float _randomGrainSpeed)
+void GranularEngine::setRandomGrainSpeed(float _randomGrainSpeed, int dir)
 {
     randomGrainSpeed = _randomGrainSpeed;
+    randomGrainSpeedState = dir;
 }
 
 // Envelope
@@ -235,7 +291,14 @@ std::vector<std::tuple<float, float, float>> GranularEngine::getGrainParameters(
     for (int i = 0; i < grainPool.size(); i++)
     {
         Grain *grain = grainPool[i];
-        grainParameters.push_back(std::make_tuple(grain->getGrainCurrentRelativePosition(), grain->getGrainCurrentVolume(), grain->getGrainPan()));
+        if (grain->getGrainLengthInSamples() > storedBufferSize * 2)
+        {
+            grainParameters.push_back(std::make_tuple(grain->getGrainCurrentRelativePosition(), grain->getGrainCurrentVolume(), grain->getGrainPan()));
+        }
+        else
+        {
+            grainParameters.push_back(std::make_tuple(grain->getGrainCurrentRelativePosition(), grain->getGrainMaxVolume(), grain->getGrainPan()));
+        }
     }
     return grainParameters;
 }
@@ -250,6 +313,7 @@ void GranularEngine::loadSampleFromUrl(juce::URL &url)
         sampleBuffer = new juce::AudioSampleBuffer(reader->numChannels, (int)reader->lengthInSamples);
         reader->read(sampleBuffer, 0, (int)reader->lengthInSamples, 0, true, true);
         delete reader;
+        fileLoaded = true;
     }
 }
 

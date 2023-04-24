@@ -43,15 +43,43 @@ private:
     // Grain Randomness
     juce::Slider grainLengthRandomnessSlider;
     juce::Label grainLengthRandomnessLabel;
+    juce::ToggleButton grainLengthRandomnessPlusToggle;
+    juce::ToggleButton grainLengthRandomnessPlusMinusToggle;
+    juce::ToggleButton grainLengthRandomnessMinusToggle;
+    int grainLengthRandomState;
+
     juce::Slider grainSpeedRandomnessSlider;
     juce::Label grainSpeedRandomnessLabel;
+    juce::ToggleButton grainSpeedRandomnessPlusToggle;
+    juce::ToggleButton grainSpeedRandomnessPlusMinusToggle;
+    juce::ToggleButton grainSpeedRandomnessMinusToggle;
+    int grainSpeedRandomState;
+
     juce::Slider grainPanRandomnessSlider;
     juce::Label grainPanRandomnessLabel;
+    juce::ToggleButton grainPanRandomnessPlusToggle;
+    juce::ToggleButton grainPanRandomnessPlusMinusToggle;
+    juce::ToggleButton grainPanRandomnessMinusToggle;
+    int grainPanRandomState;
+
     juce::Slider grainVolumeRandomnessSlider;
     juce::Label grainVolumeRandomnessLabel;
+    juce::ToggleButton grainVolumeRandomnessPlusToggle;
+    juce::ToggleButton grainVolumeRandomnessPlusMinusToggle;
+    juce::ToggleButton grainVolumeRandomnessMinusToggle;
+    int grainVolumeRandomState;
 
     // Envelope
     EnvelopeGUI envelope;
+
+    // Radio buttons
+    enum RadioButtonIds
+    {
+        grainVolume = 1001,
+        grainLength = 1002,
+        grainSpeed = 1003,
+        grainPan = 1004
+    };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainGUI)
 };

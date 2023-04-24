@@ -3,7 +3,8 @@
 #include <JuceHeader.h>
 #include "Grain.h"
 
-class GranularEngine : public juce::AudioProcessor
+class GranularEngine : public juce::AudioProcessor,
+                       public juce::ChangeBroadcaster
 {
 public:
     //==============================================================================
@@ -50,6 +51,7 @@ public:
     void setRelativeSampleEnd(float sampleEnd);
 
     void setGrainsPerSecond(float grainsPerSecond);
+    void setGrainDensity(float grainDensity);
 
     // Setters for grain parameters
     void setGrainVolume(float _grainVolume);
@@ -58,10 +60,10 @@ public:
     void setGrainPan(float _grainPan);
 
     // Setters for randomization
-    void setRandomGrainVolume(float _randomGrainVolume);
-    void setRandomGrainLengthInMs(int _randomGrainLengthInMs);
-    void setRandomGrainSpeed(float _randomGrainSpeed);
-    void setRandomGrainPan(float _randomGrainPan);
+    void setRandomGrainVolume(float _randomGrainVolume, int dir);
+    void setRandomGrainLengthInMs(int _randomGrainLengthInMs, int dir);
+    void setRandomGrainSpeed(float _randomGrainSpeed, int dir);
+    void setRandomGrainPan(float _randomGrainPan, int dir);
 
     // Setters for envelope
     void setEnvelopeParameters(int type, float attack, float peak, float decay, float sustain, float release);
@@ -83,6 +85,9 @@ private:
     AudioSampleBuffer *sampleBuffer;
     float storedSampleRate;
     int processedSamples;
+    int storedBufferSize;
+
+    bool fileLoaded;
 
     Random random;
 
@@ -105,9 +110,13 @@ private:
 
     // Randomization parameters
     float randomGrainVolume;
+    int randomGrainVolumeState;
     int randomGrainLengthInMs;
+    int randomGrainLengthState;
     float randomGrainSpeed;
+    int randomGrainSpeedState;
     float randomGrainPan;
+    int randomGrainPanState;
 
     // Envelope
     struct Envelope

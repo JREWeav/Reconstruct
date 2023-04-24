@@ -1,10 +1,5 @@
 #include "AudioWaveform.h"
 
-/*
-TODO:
-- Add grains to the waveform
-*/
-
 //==============================================================================
 AudioWaveform::AudioWaveform(AudioFormatManager &formatManagerToUse, AudioThumbnailCache &cacheToUse) : audioThumb(10000, formatManagerToUse, cacheToUse)
 {
@@ -14,6 +9,20 @@ AudioWaveform::AudioWaveform(AudioFormatManager &formatManagerToUse, AudioThumbn
     looping = false;
     curPos = 0;
     lastRelativeClick = 0;
+
+    // Loop start slider
+    addAndMakeVisible(loopStartSlider);
+    loopStartSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
+    loopStartSlider.addListener(this);
+    loopStartSlider.setRange(0.0f, 1.0f, 0.01f);
+    loopStartSlider.setValue(0);
+
+    // Loop end slider
+    addAndMakeVisible(loopEndSlider);
+    loopEndSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
+    loopEndSlider.addListener(this);
+    loopEndSlider.setRange(0.0f, 1.0f, 0.01f);
+    loopEndSlider.setValue(0);
 }
 
 AudioWaveform::~AudioWaveform()
@@ -38,7 +47,7 @@ void AudioWaveform::paint(juce::Graphics &g)
         {
             g.setColour(Colours::maroon);
             g.setOpacity(0.6);
-            g.fillRect(lastRelativeClick * getWidth(), 0, loopRelativeLength * getWidth(), getHeight());
+            g.fillRect(lastRelativeClick * getWidth(), 15, loopRelativeLength * getWidth(), getHeight());
         }
 
         // Draw Waveform
@@ -50,14 +59,14 @@ void AudioWaveform::paint(juce::Graphics &g)
 
         // Draw Playhead
         g.setColour(Colours::red);
-        g.drawRect((int)(curPos * getWidth()), 0, 2, getHeight());
+        g.drawRect((int)(curPos * getWidth()), 15, 2, getHeight());
 
-        // Draw Time
-        g.setOpacity(1);
-        g.setColour(Colours::slategrey);
-        g.fillRect(0, 0, 100, 15);
-        g.setColour(Colours::white);
-        g.drawText(timeFromSecs(curPos * audioThumb.getTotalLength()) + "/" + timeFromSecs(audioThumb.getTotalLength()), 0, 0, 100, 15, Justification::centred);
+        // // Draw Time
+        // g.setOpacity(1);
+        // g.setColour(Colours::slategrey);
+        // g.fillRect(0, 0, 100, 15);
+        // g.setColour(Colours::white);
+        // g.drawText(timeFromSecs(curPos * audioThumb.getTotalLength()) + "/" + timeFromSecs(audioThumb.getTotalLength()), 0, 0, 100, 15, Justification::centred);
     }
     else
     {
@@ -65,6 +74,12 @@ void AudioWaveform::paint(juce::Graphics &g)
         g.drawText("Audio Not Loaded", getLocalBounds(), Justification::centred);
     }
     drawGrains(g);
+}
+
+void AudioWaveform::resized()
+{
+    loopStartSlider.setBounds(0, 0, 100, 15);
+    loopEndSlider.setBounds(110, 0, 100, 15);
 }
 
 void AudioWaveform::drawGrains(juce::Graphics &g)
@@ -101,8 +116,25 @@ void AudioWaveform::clearGrains()
     grains.clear();
 }
 
-void AudioWaveform::resized()
+void AudioWaveform::sliderValueChanged(Slider *slider)
 {
+    if (slider == &loopStartSlider)
+    {
+        lastRelativeClick = loopStartSlider.getValue();
+        loopEndSlider.setRange(lastRelativeClick, 1.0f, 0.01f);
+        if (looping)
+        {
+            loopRelativeLength = loopEndSlider.getValue() - lastRelativeClick;
+        }
+        sendChangeMessage();
+    }
+    else if (slider == &loopEndSlider)
+    {
+        looping = true;
+        loopRelativeLength = loopEndSlider.getValue() - lastRelativeClick;
+        loopStartSlider.setRange(0.0f, loopEndSlider.getValue(), 0.01f);
+        sendChangeMessage();
+    }
 }
 
 void AudioWaveform::loadAudio(InputSource *src)
@@ -131,6 +163,8 @@ void AudioWaveform::mouseDown(const MouseEvent &event)
     {
         looping = false;
         lastRelativeClick = (double)event.getMouseDownX() / (double)getWidth();
+        loopStartSlider.setValue(lastRelativeClick);
+        loopEndSlider.setValue(lastRelativeClick);
         sendChangeMessage();
     }
 }
@@ -141,6 +175,7 @@ void AudioWaveform::mouseDrag(const MouseEvent &event)
     {
         looping = true;
         loopRelativeLength = (double)event.getDistanceFromDragStartX() / (double)getWidth();
+        loopEndSlider.setValue(lastRelativeClick + loopRelativeLength);
         repaint();
         sendChangeMessage();
     }

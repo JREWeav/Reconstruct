@@ -6,8 +6,6 @@ TODO:
 
 MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, GranularEngine &g) : engine{g}
 {
-    // Loading component
-
     // Grains per second
     addAndMakeVisible(grainsPerSecondSlider);
     grainsPerSecondSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
@@ -76,6 +74,19 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     grainLengthRandomnessLabel.setText("Length Random Offset", juce::dontSendNotification);
     grainLengthRandomnessLabel.attachToComponent(&grainLengthRandomnessSlider, false);
     grainLengthRandomnessLabel.setJustificationType(juce::Justification::centred);
+    addAndMakeVisible(grainLengthRandomnessPlusToggle);
+    grainLengthRandomnessPlusToggle.setButtonText("+");
+    grainLengthRandomnessPlusToggle.setRadioGroupId(RadioButtonIds::grainLength);
+    grainLengthRandomnessPlusToggle.addListener(this);
+    addAndMakeVisible(grainLengthRandomnessPlusMinusToggle);
+    grainLengthRandomnessPlusMinusToggle.setButtonText("+/-");
+    grainLengthRandomnessPlusMinusToggle.setRadioGroupId(RadioButtonIds::grainLength);
+    grainLengthRandomnessPlusMinusToggle.addListener(this);
+    grainLengthRandomnessPlusMinusToggle.setToggleState(true, juce::sendNotification);
+    addAndMakeVisible(grainLengthRandomnessMinusToggle);
+    grainLengthRandomnessMinusToggle.setButtonText("-");
+    grainLengthRandomnessMinusToggle.setRadioGroupId(RadioButtonIds::grainLength);
+    grainLengthRandomnessMinusToggle.addListener(this);
 
     addAndMakeVisible(grainSpeedRandomnessSlider);
     grainSpeedRandomnessSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
@@ -87,6 +98,19 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     grainSpeedRandomnessLabel.setText("Speed Random Offset", juce::dontSendNotification);
     grainSpeedRandomnessLabel.attachToComponent(&grainSpeedRandomnessSlider, false);
     grainSpeedRandomnessLabel.setJustificationType(juce::Justification::centred);
+    addAndMakeVisible(grainSpeedRandomnessPlusToggle);
+    grainSpeedRandomnessPlusToggle.setButtonText("+");
+    grainSpeedRandomnessPlusToggle.setRadioGroupId(RadioButtonIds::grainSpeed);
+    grainSpeedRandomnessPlusToggle.addListener(this);
+    addAndMakeVisible(grainSpeedRandomnessPlusMinusToggle);
+    grainSpeedRandomnessPlusMinusToggle.setButtonText("+/-");
+    grainSpeedRandomnessPlusMinusToggle.setRadioGroupId(RadioButtonIds::grainSpeed);
+    grainSpeedRandomnessPlusMinusToggle.addListener(this);
+    grainSpeedRandomnessPlusMinusToggle.setToggleState(true, juce::sendNotification);
+    addAndMakeVisible(grainSpeedRandomnessMinusToggle);
+    grainSpeedRandomnessMinusToggle.setButtonText("-");
+    grainSpeedRandomnessMinusToggle.setRadioGroupId(RadioButtonIds::grainSpeed);
+    grainSpeedRandomnessMinusToggle.addListener(this);
 
     addAndMakeVisible(grainPanRandomnessSlider);
     grainPanRandomnessSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
@@ -98,6 +122,19 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     grainPanRandomnessLabel.setText("Pan Random Offset", juce::dontSendNotification);
     grainPanRandomnessLabel.attachToComponent(&grainPanRandomnessSlider, false);
     grainPanRandomnessLabel.setJustificationType(juce::Justification::centred);
+    addAndMakeVisible(grainPanRandomnessPlusToggle);
+    grainPanRandomnessPlusToggle.setButtonText("+");
+    grainPanRandomnessPlusToggle.setRadioGroupId(RadioButtonIds::grainPan);
+    grainPanRandomnessPlusToggle.addListener(this);
+    addAndMakeVisible(grainPanRandomnessPlusMinusToggle);
+    grainPanRandomnessPlusMinusToggle.setButtonText("+/-");
+    grainPanRandomnessPlusMinusToggle.setRadioGroupId(RadioButtonIds::grainPan);
+    grainPanRandomnessPlusMinusToggle.addListener(this);
+    grainPanRandomnessPlusMinusToggle.setToggleState(true, juce::sendNotification);
+    addAndMakeVisible(grainPanRandomnessMinusToggle);
+    grainPanRandomnessMinusToggle.setButtonText("-");
+    grainPanRandomnessMinusToggle.setRadioGroupId(RadioButtonIds::grainPan);
+    grainPanRandomnessMinusToggle.addListener(this);
 
     addAndMakeVisible(grainVolumeRandomnessSlider);
     grainVolumeRandomnessSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
@@ -109,6 +146,19 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     grainVolumeRandomnessLabel.setText("Volume Random Offset", juce::dontSendNotification);
     grainVolumeRandomnessLabel.attachToComponent(&grainVolumeRandomnessSlider, false);
     grainVolumeRandomnessLabel.setJustificationType(juce::Justification::centred);
+    addAndMakeVisible(grainVolumeRandomnessPlusToggle);
+    grainVolumeRandomnessPlusToggle.setButtonText("+");
+    grainVolumeRandomnessPlusToggle.setRadioGroupId(RadioButtonIds::grainVolume);
+    grainVolumeRandomnessPlusToggle.addListener(this);
+    addAndMakeVisible(grainVolumeRandomnessPlusMinusToggle);
+    grainVolumeRandomnessPlusMinusToggle.setButtonText("+/-");
+    grainVolumeRandomnessPlusMinusToggle.setRadioGroupId(RadioButtonIds::grainVolume);
+    grainVolumeRandomnessPlusMinusToggle.addListener(this);
+    grainVolumeRandomnessPlusMinusToggle.setToggleState(true, juce::sendNotification);
+    addAndMakeVisible(grainVolumeRandomnessMinusToggle);
+    grainVolumeRandomnessMinusToggle.setButtonText("-");
+    grainVolumeRandomnessMinusToggle.setRadioGroupId(RadioButtonIds::grainVolume);
+    grainVolumeRandomnessMinusToggle.addListener(this);
 
     // Envelope
     addAndMakeVisible(envelope);
@@ -141,10 +191,26 @@ void MainGUI::resized()
     grainPanSlider.setBounds(getW * 20, getH * 1, getW * 3, getH * 3);
 
     // Grain Randomization
+    // volume
     grainVolumeRandomnessSlider.setBounds(getW * 8, getH * 6, getW * 3, getH * 3);
+    grainVolumeRandomnessPlusToggle.setBounds(getW * 8, getH * 9, getW, getH);
+    grainVolumeRandomnessPlusMinusToggle.setBounds(getW * 9, getH * 9, getW, getH);
+    grainVolumeRandomnessMinusToggle.setBounds(getW * 10, getH * 9, getW, getH);
+    // Length
     grainLengthRandomnessSlider.setBounds(getW * 12, getH * 6, getW * 3, getH * 3);
+    grainLengthRandomnessPlusToggle.setBounds(getW * 12, getH * 9, getW, getH);
+    grainLengthRandomnessPlusMinusToggle.setBounds(getW * 13, getH * 9, getW, getH);
+    grainLengthRandomnessMinusToggle.setBounds(getW * 14, getH * 9, getW, getH);
+    // Speed
     grainSpeedRandomnessSlider.setBounds(getW * 16, getH * 6, getW * 3, getH * 3);
+    grainSpeedRandomnessPlusToggle.setBounds(getW * 16, getH * 9, getW, getH);
+    grainSpeedRandomnessPlusMinusToggle.setBounds(getW * 17, getH * 9, getW, getH);
+    grainSpeedRandomnessMinusToggle.setBounds(getW * 18, getH * 9, getW, getH);
+    // Pan
     grainPanRandomnessSlider.setBounds(getW * 20, getH * 6, getW * 3, getH * 3);
+    grainPanRandomnessPlusToggle.setBounds(getW * 20, getH * 9, getW, getH);
+    grainPanRandomnessPlusMinusToggle.setBounds(getW * 21, getH * 9, getW, getH);
+    grainPanRandomnessMinusToggle.setBounds(getW * 22, getH * 9, getW, getH);
 
     // Envelope
     if (envelope.getCollapseState())
@@ -169,6 +235,66 @@ void MainGUI::changeListenerCallback(juce::ChangeBroadcaster *source)
 
 void MainGUI::buttonClicked(juce::Button *button)
 {
+    if (button == &grainVolumeRandomnessPlusToggle)
+    {
+        grainVolumeRandomState = 0;
+        engine.setRandomGrainVolume(grainVolumeRandomnessSlider.getValue(), grainVolumeRandomState);
+    }
+    else if (button == &grainVolumeRandomnessPlusMinusToggle)
+    {
+        grainVolumeRandomState = 1;
+        engine.setRandomGrainVolume(grainVolumeRandomnessSlider.getValue(), grainVolumeRandomState);
+    }
+    else if (button == &grainVolumeRandomnessMinusToggle)
+    {
+        grainVolumeRandomState = 2;
+        engine.setRandomGrainVolume(grainVolumeRandomnessSlider.getValue(), grainVolumeRandomState);
+    }
+    else if (button == &grainLengthRandomnessPlusToggle)
+    {
+        grainLengthRandomState = 0;
+        engine.setRandomGrainLengthInMs(grainLengthRandomnessSlider.getValue(), grainLengthRandomState);
+    }
+    else if (button == &grainLengthRandomnessPlusMinusToggle)
+    {
+        grainLengthRandomState = 1;
+        engine.setRandomGrainLengthInMs(grainLengthRandomnessSlider.getValue(), grainLengthRandomState);
+    }
+    else if (button == &grainLengthRandomnessMinusToggle)
+    {
+        grainLengthRandomState = 2;
+        engine.setRandomGrainLengthInMs(grainLengthRandomnessSlider.getValue(), grainLengthRandomState);
+    }
+    else if (button == &grainSpeedRandomnessPlusToggle)
+    {
+        grainSpeedRandomState = 0;
+        engine.setRandomGrainSpeed(grainSpeedRandomnessSlider.getValue(), grainSpeedRandomState);
+    }
+    else if (button == &grainSpeedRandomnessPlusMinusToggle)
+    {
+        grainSpeedRandomState = 1;
+        engine.setRandomGrainSpeed(grainSpeedRandomnessSlider.getValue(), grainSpeedRandomState);
+    }
+    else if (button == &grainSpeedRandomnessMinusToggle)
+    {
+        grainSpeedRandomState = 2;
+        engine.setRandomGrainSpeed(grainSpeedRandomnessSlider.getValue(), grainSpeedRandomState);
+    }
+    else if (button == &grainPanRandomnessPlusToggle)
+    {
+        grainPanRandomState = 0;
+        engine.setRandomGrainPan(grainPanRandomnessSlider.getValue(), grainPanRandomState);
+    }
+    else if (button == &grainPanRandomnessPlusMinusToggle)
+    {
+        grainPanRandomState = 1;
+        engine.setRandomGrainPan(grainPanRandomnessSlider.getValue(), grainPanRandomState);
+    }
+    else if (button == &grainPanRandomnessMinusToggle)
+    {
+        grainPanRandomState = 2;
+        engine.setRandomGrainPan(grainPanRandomnessSlider.getValue(), grainPanRandomState);
+    }
 }
 
 void MainGUI::sliderValueChanged(juce::Slider *slider)
@@ -203,21 +329,21 @@ void MainGUI::sliderValueChanged(juce::Slider *slider)
     // Grain Randomization
     else if (slider == &grainVolumeRandomnessSlider)
     {
-        engine.setRandomGrainVolume(grainVolumeRandomnessSlider.getValue());
+        engine.setRandomGrainVolume(grainVolumeRandomnessSlider.getValue(), grainVolumeRandomState);
     }
 
     else if (slider == &grainPanRandomnessSlider)
     {
-        engine.setRandomGrainPan(grainPanRandomnessSlider.getValue());
+        engine.setRandomGrainPan(grainPanRandomnessSlider.getValue(), grainPanRandomState);
     }
 
     else if (slider == &grainSpeedRandomnessSlider)
     {
-        engine.setRandomGrainSpeed(grainSpeedRandomnessSlider.getValue());
+        engine.setRandomGrainSpeed(grainSpeedRandomnessSlider.getValue(), grainSpeedRandomState);
     }
 
     else if (slider == &grainLengthRandomnessSlider)
     {
-        engine.setRandomGrainLengthInMs(grainLengthRandomnessSlider.getValue());
+        engine.setRandomGrainLengthInMs(grainLengthRandomnessSlider.getValue(), grainLengthRandomState);
     }
 }
