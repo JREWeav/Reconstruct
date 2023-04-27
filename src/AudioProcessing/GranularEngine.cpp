@@ -149,7 +149,7 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity, int offse
     {
         newGrainVolume *= -1.0f;
     }
-    else if (randomGrainVolumeState == 0)
+    else if (randomGrainVolumeState == 1)
     {
         newGrainVolume = grainVolume + ((random.nextFloat() * randomGrainVolume * 2.0f) - randomGrainVolume);
     }
@@ -161,7 +161,7 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity, int offse
     {
         newGrainLengthInMs *= -1;
     }
-    else if (randomGrainLengthState == 0)
+    else if (randomGrainLengthState == 1)
     {
         newGrainLengthInMs = grainLengthInMs + ((int)ceil(((random.nextFloat() * (float)randomGrainLengthInMs * 2.0f))) - randomGrainLengthInMs);
     }
@@ -185,7 +185,7 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity, int offse
     {
         newGrainPan *= -1.0f;
     }
-    else if (randomGrainPanState == 0)
+    else if (randomGrainPanState == 1)
     {
         newGrainPan = grainPan + ((random.nextFloat() * randomGrainPan * 2.0f) - randomGrainPan);
     }
