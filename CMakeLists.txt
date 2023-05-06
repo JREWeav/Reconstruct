@@ -22,7 +22,7 @@ juce_add_plugin(${TargetName}
     PLUGIN_MANUFACTURER_CODE JuWe
     PLUGIN_CODE Rec0
                           
-    FORMATS AU VST3 Standalone                  
+    FORMATS VST3 Standalone AU           
     PRODUCT_NAME "Reconstruct")       
 
 juce_generate_juce_header(${TargetName})
@@ -34,11 +34,12 @@ target_sources(${TargetName}
         ./src/AudioProcessing/PluginProcessor.cpp
         ./src/AudioProcessing/EnvelopeGenerator.cpp
 
-        ./src/GUI/AudioWaveform.cpp
-        ./src/GUI/EnvelopeGUI.cpp
         ./src/GUI/LoadingComponent.cpp
         ./src/GUI/MainGUI.cpp
         ./src/GUI/PluginEditor.cpp
+        ./src/GUI/Components/AudioWaveform.cpp
+        ./src/GUI/Components/EnvelopeGUI.cpp
+        ./src/GUI/Components/RandomnessDial.cpp
 
         ./src/LookAndFeel/ReconLookAndFeel.cpp
         )

@@ -1,8 +1,9 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "EnvelopeGUI.h"
+#include "Components/EnvelopeGUI.h"
 #include "../AudioProcessing/GranularEngine.h"
+#include "Components/RandomnessDial.h"
 
 class MainGUI : public juce::Component,
                 public juce::Button::Listener,
@@ -27,59 +28,45 @@ private:
     GranularEngine &engine;
 
     // Grains per second
-    juce::Slider grainsPerSecondSlider;
-    juce::Label grainsPerSecondLabel;
+    Slider grainDensitySlider;
+    Label grainDensityLabel;
 
     // Grain parameters
-    juce::Slider grainLengthSlider;
-    juce::Label grainLengthLabel;
-    juce::Slider grainSpeedSlider;
-    juce::Label grainSpeedLabel;
-    juce::Slider grainPanSlider;
-    juce::Label grainPanLabel;
-    juce::Slider grainVolumeSlider;
-    juce::Label grainVolumeLabel;
+    Slider grainLengthSlider;
+    Label grainLengthLabel;
+    Slider grainSpeedSlider;
+    Label grainSpeedLabel;
+    Slider grainPanSlider;
+    Label grainPanLabel;
+    Slider grainVolumeSlider;
+    Label grainVolumeLabel;
 
     // Grain Randomness
-    juce::Slider grainLengthRandomnessSlider;
-    juce::Label grainLengthRandomnessLabel;
-    juce::ToggleButton grainLengthRandomnessPlusToggle;
-    juce::ToggleButton grainLengthRandomnessPlusMinusToggle;
-    juce::ToggleButton grainLengthRandomnessMinusToggle;
-    int grainLengthRandomState;
 
-    juce::Slider grainSpeedRandomnessSlider;
-    juce::Label grainSpeedRandomnessLabel;
-    juce::ToggleButton grainSpeedRandomnessPlusToggle;
-    juce::ToggleButton grainSpeedRandomnessPlusMinusToggle;
-    juce::ToggleButton grainSpeedRandomnessMinusToggle;
-    int grainSpeedRandomState;
-
-    juce::Slider grainPanRandomnessSlider;
-    juce::Label grainPanRandomnessLabel;
-    juce::ToggleButton grainPanRandomnessPlusToggle;
-    juce::ToggleButton grainPanRandomnessPlusMinusToggle;
-    juce::ToggleButton grainPanRandomnessMinusToggle;
-    int grainPanRandomState;
-
-    juce::Slider grainVolumeRandomnessSlider;
-    juce::Label grainVolumeRandomnessLabel;
-    juce::ToggleButton grainVolumeRandomnessPlusToggle;
-    juce::ToggleButton grainVolumeRandomnessPlusMinusToggle;
-    juce::ToggleButton grainVolumeRandomnessMinusToggle;
-    int grainVolumeRandomState;
+    RandomnessDial grainVolumeRandomnessSlider;
+    Label grainVolumeRandomnessLabel;
+    RandomnessDial grainLengthRandomnessSlider;
+    Label grainLengthRandomnessLabel;
+    RandomnessDial grainSpeedRandomnessSlider;
+    Label grainSpeedRandomnessLabel;
+    RandomnessDial grainPanRandomnessSlider;
+    Label grainPanRandomnessLabel;
 
     // Envelope
     EnvelopeGUI envelope;
 
-    // Radio buttons
-    enum RadioButtonIds
-    {
-        grainVolume = 1001,
-        grainLength = 1002,
-        grainSpeed = 1003,
-        grainPan = 1004
-    };
+    // Slider attachments
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainDensityAttachment;
+
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainVolumeAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainLengthAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainSpeedAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainPanAttachment;
+
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainVolumeRandomnessAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainLengthRandomnessAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainSpeedRandomnessAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainPanRandomnessAttachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainGUI)
 };

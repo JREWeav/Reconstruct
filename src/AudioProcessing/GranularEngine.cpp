@@ -2,12 +2,12 @@
 
 //==============================================================================
 
-GranularEngine::GranularEngine(juce::AudioFormatManager &formatManager)
-    : AudioProcessor(BusesProperties()), formatManager(formatManager)
+GranularEngine::GranularEngine(AudioFormatManager &formatManager, AudioProcessorValueTreeState &vts)
+    : AudioProcessor(BusesProperties()), formatManager(formatManager), vts(vts)
 {
     processedSamples = 0;
 
-    grainsPerSecond = 1;
+    grainDensity = 0;
     grainTimerInSamples = 0;
 
     // Random Parameters
@@ -53,7 +53,7 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
     const int numSamples = buffer.getNumSamples();
     int samplesToProcess = numSamples;
 
-    int grainIntervalInSamples = (int)ceil(storedSampleRate / grainsPerSecond);
+    int grainIntervalInSamples = storedSampleRate / ((grainDensity * 1000.0f) / grainLengthInMs);
 
     for (const MidiMessageMetadata metadata : midiMessages)
     {
@@ -96,12 +96,12 @@ void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMe
     }
     if (grainPool.size() > 0)
     {
-        processActiveGrains(numSamples, buffer, sampleBuffer);
+        processActiveGrains(numSamples, buffer);
     }
     sendChangeMessage();
 }
 
-void GranularEngine::processActiveGrains(int numSamples, AudioSampleBuffer &buffer, AudioSampleBuffer *_sampleBuffer)
+void GranularEngine::processActiveGrains(int numSamples, AudioSampleBuffer &buffer)
 {
     // Loop through each Grain object
     for (int i = 0; i < grainPool.size(); ++i)
@@ -112,10 +112,10 @@ void GranularEngine::processActiveGrains(int numSamples, AudioSampleBuffer &buff
         if (grain->getGrainPlaybackPositionInSamples() == 0)
         {
             grain->setGrainSampleRate(storedSampleRate);
-            grain->initGrain(sampleBuffer, envelope.type, envelope.attack, envelope.peak, envelope.decay, envelope.sustain, envelope.release);
+            grain->initGrain(sampleBuffer.get(), envelope.type, envelope.attack, envelope.peak, envelope.decay, envelope.sustain, envelope.release);
         }
 
-        grain->updateGrain(numSamples, buffer, _sampleBuffer);
+        grain->updateGrain(numSamples, buffer, sampleBuffer.get());
 
         // Check if the grain has finished playing
         if (grain->getGrainPlaybackPositionInSamples() >= grain->getGrainLengthInSamples())
@@ -147,7 +147,7 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity, int offse
     float newGrainVolume = grainVolume + (random.nextFloat() * randomGrainVolume);
     if (randomGrainVolumeState == 2)
     {
-        newGrainVolume *= -1.0f;
+        newGrainVolume = grainVolume + -1.0f * ((random.nextFloat() * randomGrainVolume));
     }
     else if (randomGrainVolumeState == 1)
     {
@@ -159,7 +159,7 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity, int offse
     int newGrainLengthInMs = grainLengthInMs + (int)ceil(random.nextFloat() * (float)randomGrainLengthInMs);
     if (randomGrainLengthState == 2)
     {
-        newGrainLengthInMs *= -1;
+        newGrainLengthInMs = grainLengthInMs + (-1.0f * (int)ceil(random.nextFloat() * (float)randomGrainLengthInMs));
     }
     else if (randomGrainLengthState == 1)
     {
@@ -171,7 +171,7 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity, int offse
     float newGrainSpeed = grainSpeed + ((random.nextFloat() * randomGrainSpeed));
     if (randomGrainSpeedState == 2)
     {
-        newGrainSpeed *= -1.0f;
+        newGrainSpeed = grainSpeed + (-1.0f * ((random.nextFloat() * randomGrainSpeed)));
     }
     else if (randomGrainSpeedState == 1)
     {
@@ -183,7 +183,7 @@ void GranularEngine::generateGrain(int midiNoteNumber, float velocity, int offse
     float newGrainPan = grainPan + ((random.nextFloat() * randomGrainPan));
     if (randomGrainPanState == 2)
     {
-        newGrainPan *= -1.0f;
+        newGrainPan = grainPan + (-1 * ((random.nextFloat() * randomGrainPan)));
     }
     else if (randomGrainPanState == 1)
     {
@@ -227,9 +227,9 @@ void GranularEngine::setRelativeSampleEnd(float end)
 }
 
 // Grains per second
-void GranularEngine::setGrainsPerSecond(float hz)
+void GranularEngine::setGrainDensity(float _grainDensity)
 {
-    grainsPerSecond = hz;
+    grainDensity = _grainDensity;
 }
 
 // Grain parameters
@@ -310,13 +310,22 @@ void GranularEngine::loadSampleFromUrl(juce::URL &url)
     juce::AudioFormatReader *reader = formatManager.createReaderFor(url.createInputStream(false));
     if (reader != nullptr)
     {
-        sampleBuffer = new juce::AudioSampleBuffer(reader->numChannels, (int)reader->lengthInSamples);
-        reader->read(sampleBuffer, 0, (int)reader->lengthInSamples, 0, true, true);
+        sampleBuffer.reset(new juce::AudioBuffer<float>(reader->numChannels, reader->lengthInSamples));
+        reader->read(sampleBuffer.get(), 0, reader->lengthInSamples, 0, true, true);
         delete reader;
         fileLoaded = true;
     }
 }
 
+AudioSampleBuffer *GranularEngine::getSampleBuffer()
+{
+    return sampleBuffer.get();
+}
+
+bool GranularEngine::isFileLoaded()
+{
+    return fileLoaded;
+}
 //==============================================================================
 
 void GranularEngine::getStateInformation(MemoryBlock &destData)

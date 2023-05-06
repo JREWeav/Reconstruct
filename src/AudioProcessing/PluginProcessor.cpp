@@ -10,12 +10,15 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
 #endif
                          .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
-      )
+                         ),
+      vts(*this, nullptr, "PARAMETERS", createParameterLayout()), granularEngines{GranularEngine(formatManager, vts)}
 {
+    formatManager.registerBasicFormats();
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
 {
+    formatManager.clearFormats();
 }
 
 //==============================================================================
@@ -138,6 +141,43 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, j
         buffer.clear(i, 0, buffer.getNumSamples());
 
     granularEngines->processBlock(buffer, midiMessages);
+}
+
+// Create AudioProcessorValueTreeState
+
+AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createParameterLayout()
+{
+    std::vector<std::unique_ptr<RangedAudioParameter>> params;
+
+    // Samples Begin and End
+    params.push_back(std::make_unique<AudioParameterFloat>("SAMPLE_START", "Sample Start", NormalisableRange<float>(0.0f, 1.0f), 0.0f));
+    params.push_back(std::make_unique<AudioParameterFloat>("SAMPLE_END", "Sample End", NormalisableRange<float>(0.0f, 1.0f), 0.0f));
+
+    // Grain Density
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_DENSITY", "Grain Density", NormalisableRange<float>(0.1f, 5.0f), 0.1f));
+
+    // Voices
+    // params.push_back(std::make_unique<AudioParameterInt>("NUM_VOICES", "Number of Voices", 1, 1000, 1));
+
+    // Grain Parameters
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_VOLUME", "Grain Volume", 0, 100, 50));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_LENGTH", "Grain Length", 20, 500, 100));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_SPEED", "Grain Speed", 1, 500, 100));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_PAN", "Grain Pan", 0, 100, 50));
+
+    // Grain Randomization
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_VOLUME_RANDOMNESS", "Grain Volume Randomization", 0, 100, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_LENGTH_RANDOMNESS", "Grain Length Randomization", 0, 500, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_SPEED_RANDOMNESS", "Grain Speed Randomization", 0, 300, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_PAN_RANDOMNESS", "Grain Pan Randomization", 0, 100, 0));
+
+    // Grain Envelope
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_ATTACK", "Grain Attack", 0, 100, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_DECAY", "Grain Decay", 0, 100, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_SUSTAIN", "Grain Sustain", 0, 100, 100));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_RELEASE", "Grain Release", 0, 100, 0));
+
+    return {params.begin(), params.end()};
 }
 
 //==============================================================================

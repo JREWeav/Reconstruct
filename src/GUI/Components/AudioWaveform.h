@@ -1,18 +1,9 @@
 #pragma once
 
-// CMake builds don't use an AppConfig.h, so it's safe to include juce module headers
-// directly. If you need to remain compatible with Projucer-generated builds, and
-// have called `juce_generate_juce_header(<thisTarget>)` in your CMakeLists.txt,
-// you could `#include <JuceHeader.h>` here instead, to make all your module headers visible.
 #include <JuceHeader.h>
 
 //==============================================================================
-/*
-    This component lives inside our window, and this is where you should put all
-    your controls and content.
-*/
 class AudioWaveform : public juce::Component,
-                      public juce::Slider::Listener,
                       public juce::ChangeListener,
                       public juce::ChangeBroadcaster
 {
@@ -27,6 +18,9 @@ public:
 
     // Set the playhead position
     void setRelativePosition(double pos);
+    void setRelativeClick(double pos);
+    void setRelativeLoopLength(double length);
+    void setLooping(bool looping);
     double getLastRelativeClick();
     double getRelativeLoopLength();
     bool isLooping();
@@ -40,22 +34,15 @@ public:
     void addGrain(float relativePosition, float pan, float volume);
     void clearGrains();
 
-    // Slider logic
-    void sliderValueChanged(Slider *slider) override;
-
     //==============================================================================
     void paint(juce::Graphics &) override;
     void resized() override;
 
 private:
     //==============================================================================
-    // Your private member variables go here...
     String timeFromSecs(double seconds);
 
-    juce::AudioThumbnail audioThumb;
-
-    juce::Slider loopStartSlider;
-    juce::Slider loopEndSlider;
+    AudioThumbnail audioThumb;
 
     struct Grain
     {

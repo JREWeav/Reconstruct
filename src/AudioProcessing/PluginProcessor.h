@@ -23,7 +23,6 @@ public:
     //==============================================================================
     juce::AudioProcessorEditor *createEditor() override;
     bool hasEditor() const override;
-
     //==============================================================================
     const juce::String getName() const override;
 
@@ -43,12 +42,16 @@ public:
     void getStateInformation(juce::MemoryBlock &destData) override;
     void setStateInformation(const void *data, int sizeInBytes) override;
     //==============================================================================
+    // AudioProcessorValueTreeState
+
+    AudioProcessorValueTreeState vts;
+    AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
 private:
     //==============================================================================
-    AudioFormatManager formatManager;
-    GranularEngine granularEngines[1]{formatManager};
-    const int numVoices = 100;
 
+    AudioFormatManager formatManager;
+    GranularEngine granularEngines[1];
+    const int numVoices = 100;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
 };

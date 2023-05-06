@@ -12,12 +12,12 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
     mainComponent.setLookAndFeel(&customLookAndFeel);
     addAndMakeVisible(loadComponent);
     loadComponent.setLookAndFeel(&customLookAndFeel);
-
-    formatManager.registerBasicFormats();
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
 {
+    mainComponent.setLookAndFeel(nullptr);
+    loadComponent.setLookAndFeel(nullptr);
 }
 
 //==============================================================================
