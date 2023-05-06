@@ -13,6 +13,7 @@ public:
     ~AudioWaveform();
 
     void loadAudio(InputSource *src);
+    void loadAudio(AudioBuffer<float> *src, int sampleRate);
 
     void changeListenerCallback(ChangeBroadcaster *source) override;
 

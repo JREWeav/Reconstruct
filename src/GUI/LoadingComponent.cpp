@@ -22,6 +22,7 @@ LoadingComponent::LoadingComponent(AudioFormatManager &formatManager, AudioThumb
 
     if (engines->isFileLoaded())
     {
+        waveForm.loadAudio(engines->getSampleBuffer(), engines->getStoredSampleRate());
         waveForm.setRelativePosition(loopStartSlider.getValue());
         waveForm.setRelativeClick(loopStartSlider.getValue());
         if (loopEndSlider.getValue() == loopStartSlider.getValue())
@@ -70,10 +71,10 @@ void LoadingComponent::loadFile()
 {
     if (fileChooser.browseForFileToOpen())
     {
-        auto *input = new juce::URLInputSource(fileChooser.getURLResult());
-        waveForm.loadAudio(input);
         auto fileURL = fileChooser.getURLResult();
         engines->loadSampleFromUrl(fileURL);
+        auto *input = new juce::URLInputSource(fileChooser.getURLResult());
+        waveForm.loadAudio(input);
     }
 }
 

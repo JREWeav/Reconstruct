@@ -81,6 +81,8 @@ public:
     // Getter for grain pool
     std::vector<std::tuple<float, float, float>> getGrainParameters();
 
+    int getStoredSampleRate();
+
     // Grain processing
     void generateGrain(int midiNoteNumber, float velocity, int offsetInSamples);
     void processActiveGrains(int numSamples, AudioSampleBuffer &buffer);

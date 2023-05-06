@@ -110,7 +110,15 @@ void AudioWaveform::loadAudio(InputSource *src)
     {
         audioThumb.sendChangeMessage();
     }
-    looping = false;
+}
+
+void AudioWaveform::loadAudio(AudioBuffer<float> *src, int sampleRate)
+{
+    audioThumb.clear();
+    loaded = true;
+    audioThumb.setSource(src, sampleRate, 0);
+
+    audioThumb.sendChangeMessage();
 }
 
 void AudioWaveform::setRelativePosition(double pos)

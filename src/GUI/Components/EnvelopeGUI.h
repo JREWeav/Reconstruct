@@ -7,7 +7,7 @@ class EnvelopeGUI : public juce::Component,
                     public juce::ComboBox::Listener
 {
 public:
-    EnvelopeGUI();
+    EnvelopeGUI(AudioProcessorValueTreeState &vts);
     ~EnvelopeGUI() override;
 
     void paint(juce::Graphics &) override;
@@ -31,9 +31,10 @@ public:
     float getRelease();
 
 private:
-    juce::ComboBox envelopeType;
+    ComboBox envelopeType;
+    std::unique_ptr<AudioProcessorValueTreeState::ComboBoxAttachment> envelopeTypeAttachment;
 
-    juce::StringArray envelopeTypes{"ADSR", "ASR", "Hamming", "Hann", "Blackman", "White Noise"};
+    StringArray envelopeTypes{"ADSR", "ASR", "AR", "AHR", "AHDSR", "AHDSR2"};
 
     bool isCollapsed = true;
 

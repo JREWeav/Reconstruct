@@ -172,6 +172,8 @@ AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createP
     params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_PAN_RANDOMNESS", "Grain Pan Randomization", 0, 100, 0));
 
     // Grain Envelope
+    StringArray envelopeTypes = {"ADSR", "ASR", "Hamming", "Hann", "Blackman", "White Noise"};
+    params.push_back(std::make_unique<AudioParameterChoice>("ENVELOPE_TYPE", "Envelope Type", envelopeTypes, 0));
     params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_ATTACK", "Grain Attack", 0, 100, 0));
     params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_DECAY", "Grain Decay", 0, 100, 0));
     params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_SUSTAIN", "Grain Sustain", 0, 100, 100));

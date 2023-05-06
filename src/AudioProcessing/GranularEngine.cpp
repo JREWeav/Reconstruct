@@ -303,6 +303,11 @@ std::vector<std::tuple<float, float, float>> GranularEngine::getGrainParameters(
     return grainParameters;
 }
 
+// Getter for SampleRate
+int GranularEngine::getStoredSampleRate()
+{
+    return storedSampleRate;
+}
 //==============================================================================
 
 void GranularEngine::loadSampleFromUrl(juce::URL &url)

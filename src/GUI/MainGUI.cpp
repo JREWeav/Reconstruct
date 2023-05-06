@@ -8,7 +8,8 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
                                                                                                               grainVolumeRandomnessSlider{engine.vts, "GRAIN_VOLUME_RANDOMNESS"},
                                                                                                               grainLengthRandomnessSlider{engine.vts, "GRAIN_LENGTH_RANDOMNESS"},
                                                                                                               grainSpeedRandomnessSlider{engine.vts, "GRAIN_SPEED_RANDOMNESS"},
-                                                                                                              grainPanRandomnessSlider{engine.vts, "GRAIN_PAN_RANDOMNESS"}
+                                                                                                              grainPanRandomnessSlider{engine.vts, "GRAIN_PAN_RANDOMNESS"},
+                                                                                                              envelope{engine.vts}
 {
     // Grains per second
     addAndMakeVisible(grainDensitySlider);
@@ -71,7 +72,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
 
     addAndMakeVisible(grainVolumeRandomnessSlider);
     grainVolumeRandomnessSlider.addChangeListener(this);
-    grainVolumeRandomnessSlider.setValue(0);
+    grainVolumeRandomnessSlider.setValue(engine.vts.getRawParameterValue("GRAIN_VOLUME_RANDOMNESS")->load());
     addAndMakeVisible(grainVolumeRandomnessLabel);
     grainVolumeRandomnessLabel.setText("Volume Random Offset", juce::dontSendNotification);
     grainVolumeRandomnessLabel.attachToComponent(&grainVolumeRandomnessSlider, false);
@@ -79,7 +80,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
 
     addAndMakeVisible(grainLengthRandomnessSlider);
     grainLengthRandomnessSlider.addChangeListener(this);
-    grainLengthRandomnessSlider.setValue(0);
+    grainLengthRandomnessSlider.setValue(engine.vts.getRawParameterValue("GRAIN_LENGTH_RANDOMNESS")->load());
     addAndMakeVisible(grainLengthRandomnessLabel);
     grainLengthRandomnessLabel.setText("Length Random Offset", juce::dontSendNotification);
     grainLengthRandomnessLabel.attachToComponent(&grainLengthRandomnessSlider, false);
@@ -87,7 +88,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
 
     addAndMakeVisible(grainSpeedRandomnessSlider);
     grainSpeedRandomnessSlider.addChangeListener(this);
-    grainSpeedRandomnessSlider.setValue(0);
+    grainSpeedRandomnessSlider.setValue(engine.vts.getRawParameterValue("GRAIN_SPEED_RANDOMNESS")->load());
     addAndMakeVisible(grainSpeedRandomnessLabel);
     grainSpeedRandomnessLabel.setText("Speed Random Offset", juce::dontSendNotification);
     grainSpeedRandomnessLabel.attachToComponent(&grainSpeedRandomnessSlider, false);
@@ -95,7 +96,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
 
     addAndMakeVisible(grainPanRandomnessSlider);
     grainPanRandomnessSlider.addChangeListener(this);
-    grainPanRandomnessSlider.setValue(0);
+    grainPanRandomnessSlider.setValue(engine.vts.getRawParameterValue("GRAIN_PAN_RANDOMNESS")->load());
     addAndMakeVisible(grainPanRandomnessLabel);
     grainPanRandomnessLabel.setText("Pan Random Offset", juce::dontSendNotification);
     grainPanRandomnessLabel.attachToComponent(&grainPanRandomnessSlider, false);

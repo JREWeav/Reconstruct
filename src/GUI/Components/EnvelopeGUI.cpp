@@ -1,11 +1,12 @@
 #include "EnvelopeGUI.h"
 
-EnvelopeGUI::EnvelopeGUI()
+EnvelopeGUI::EnvelopeGUI(AudioProcessorValueTreeState &vts)
 {
     addAndMakeVisible(envelopeType);
-    envelopeType.addItemList(envelopeTypes, 1);
-    envelopeType.setSelectedId(1);
     envelopeType.addListener(this);
+    envelopeTypeAttachment = std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(vts, "ENVELOPE_TYPE", envelopeType);
+    envelopeType.addItemList({"ADSR", "ASR", "Hamming", "Hann", "Blackman", "White Noise"}, 1);
+    envelopeType.setSelectedId(vts.getRawParameterValue("ENVELOPE_TYPE")->load() + 1);
 
     envelope.type = envelopeType.getSelectedId();
     envelope.attack = 0.2f;
