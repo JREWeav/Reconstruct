@@ -6,7 +6,7 @@
 class RandomnessDial : public Component, public Slider::Listener, public Button::Listener, public ChangeBroadcaster
 {
 public:
-    RandomnessDial(AudioProcessorValueTreeState &_vts, juce::String attachmentID);
+    RandomnessDial(AudioProcessorValueTreeState &_vts, juce::String attachmentID, std::function<String(double value)> textFromValue);
     ~RandomnessDial();
 
     void paint(Graphics &) override;
@@ -14,6 +14,7 @@ public:
     void setValue(float value);
     double getValue();
     int getToggleState();
+    void updateText();
 
     void sliderValueChanged(Slider *s) override;
     void buttonClicked(Button *) override;

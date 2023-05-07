@@ -10,15 +10,21 @@ LoadingComponent::LoadingComponent(AudioFormatManager &formatManager, AudioThumb
 
     // Loop start slider
     addAndMakeVisible(loopStartSlider);
-    loopStartSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
-    loopStartSlider.addListener(this);
     loopStartAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(engines->vts, "SAMPLE_START", loopStartSlider);
+    loopStartSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
+    loopStartSlider.textFromValueFunction = [](double value)
+    { return String(value, 2); };
+    loopStartSlider.addListener(this);
+    loopStartSlider.updateText();
 
     // Loop end slider
     addAndMakeVisible(loopEndSlider);
-    loopEndSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
-    loopEndSlider.addListener(this);
     loopEndAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(engines->vts, "SAMPLE_END", loopEndSlider);
+    loopEndSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
+    loopEndSlider.textFromValueFunction = [](double value)
+    { return String(value, 2); };
+    loopEndSlider.addListener(this);
+    loopEndSlider.updateText();
 
     if (engines->isFileLoaded())
     {

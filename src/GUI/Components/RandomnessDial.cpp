@@ -2,14 +2,15 @@
 
 //==============================================================================
 
-RandomnessDial::RandomnessDial(AudioProcessorValueTreeState &_vts, juce::String attachmentID) : vts(_vts)
+RandomnessDial::RandomnessDial(AudioProcessorValueTreeState &_vts, juce::String attachmentID, std::function<String(double value)> textFromValue) : vts(_vts)
 {
     addAndMakeVisible(slider);
     slider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
     slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
     attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(vts, attachmentID, slider);
+    slider.setNumDecimalPlacesToDisplay(0);
     slider.addListener(this);
-    slider.setValue(0);
+    slider.textFromValueFunction = textFromValue;
     addAndMakeVisible(plusToggle);
     plusToggle.setButtonText("+");
     plusToggle.setRadioGroupId(1000);
@@ -84,4 +85,9 @@ void RandomnessDial::buttonClicked(Button *button)
         toggleState = 2;
         sendChangeMessage();
     }
+}
+
+void RandomnessDial::updateText()
+{
+    slider.updateText();
 }

@@ -68,5 +68,10 @@ private:
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainSpeedRandomnessAttachment;
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainPanRandomnessAttachment;
 
+    auto textFromValue(double value) -> String
+    {
+        return String(value, 2);
+    };
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainGUI)
 };

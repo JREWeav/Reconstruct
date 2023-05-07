@@ -149,6 +149,12 @@ AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createP
 {
     std::vector<std::unique_ptr<RangedAudioParameter>> params;
 
+    auto stringFromValue = [](float value, int maximumStringLength) -> juce::String
+    { return juce::String(value, maximumStringLength) + "%"; };
+
+    auto valueFromString = [](const juce::String &text) -> float
+    { return text.dropLastCharacters(1).getFloatValue(); };
+
     // Samples Begin and End
     params.push_back(std::make_unique<AudioParameterFloat>("SAMPLE_START", "Sample Start", NormalisableRange<float>(0.0f, 1.0f), 0.0f));
     params.push_back(std::make_unique<AudioParameterFloat>("SAMPLE_END", "Sample End", NormalisableRange<float>(0.0f, 1.0f), 0.0f));
@@ -160,9 +166,15 @@ AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createP
     // params.push_back(std::make_unique<AudioParameterInt>("NUM_VOICES", "Number of Voices", 1, 1000, 1));
 
     // Grain Parameters
-    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_VOLUME", "Grain Volume", 0, 100, 50));
-    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_LENGTH", "Grain Length", 20, 500, 100));
-    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_SPEED", "Grain Speed", 1, 500, 100));
+    params.push_back(std::make_unique<AudioParameterFloat>(
+        "GRAIN_VOLUME", "Grain Volume", 0, 100, 50));
+
+    params.push_back(std::make_unique<AudioParameterFloat>(
+        "GRAIN_LENGTH", "Grain Length", 20, 500, 100));
+
+    params.push_back(std::make_unique<AudioParameterFloat>(
+        "GRAIN_SPEED", "Grain Speed", 1, 500, 100));
+
     params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_PAN", "Grain Pan", 0, 100, 50));
 
     // Grain Randomization
