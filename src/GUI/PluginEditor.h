@@ -24,8 +24,9 @@ private:
     ReconLookAndFeel customLookAndFeel;
     AudioThumbnailCache thumbnailCache{10000};
 
-    MainGUI mainComponent;
+    MainGUI mainComponent1;
+    MainGUI mainComponent2;
     LoadingComponent loadComponent;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessorEditor)
 };

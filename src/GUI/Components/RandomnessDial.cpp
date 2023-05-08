@@ -4,6 +4,7 @@
 
 RandomnessDial::RandomnessDial(AudioProcessorValueTreeState &_vts, juce::String sliderID, juce::String buttonID, std::function<String(double value)> textFromValue) : vts(_vts), sliderID(sliderID), buttonID(buttonID)
 {
+    DBG(sliderID);
     addAndMakeVisible(slider);
     slider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
     slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
@@ -100,8 +101,6 @@ void RandomnessDial::buttonClicked(Button *button)
     vts.getParameter(buttonID)->beginChangeGesture();
     vts.getParameter(buttonID)->setValueNotifyingHost(0.5f * (float)toggleState);
     vts.getParameter(buttonID)->endChangeGesture();
-    DBG("Toggle State " + String((float)toggleState));
-    DBG("VTS Value " + std::to_string(vts.getRawParameterValue(buttonID)->load()));
     sendChangeMessage();
 }
 

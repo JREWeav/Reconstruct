@@ -6,11 +6,12 @@ LoadingComponent::LoadingComponent(AudioFormatManager &formatManager, AudioThumb
     addAndMakeVisible(waveForm);
     loadButton.addListener(this);
     waveForm.addChangeListener(this);
-    engines->addChangeListener(this);
+    engines[0].addChangeListener(this);
+    engines[1].addChangeListener(this);
 
     // Loop start slider
     addAndMakeVisible(loopStartSlider);
-    loopStartAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(engines->vts, "SAMPLE_START", loopStartSlider);
+    loopStartAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(engines->globalVTS, "SAMPLE_START", loopStartSlider);
     loopStartSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
     loopStartSlider.textFromValueFunction = [](double value)
     { return String(value, 2); };
@@ -19,7 +20,7 @@ LoadingComponent::LoadingComponent(AudioFormatManager &formatManager, AudioThumb
 
     // Loop end slider
     addAndMakeVisible(loopEndSlider);
-    loopEndAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(engines->vts, "SAMPLE_END", loopEndSlider);
+    loopEndAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(engines->globalVTS, "SAMPLE_END", loopEndSlider);
     loopEndSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
     loopEndSlider.textFromValueFunction = [](double value)
     { return String(value, 2); };
@@ -46,7 +47,8 @@ LoadingComponent::LoadingComponent(AudioFormatManager &formatManager, AudioThumb
 
 LoadingComponent::~LoadingComponent()
 {
-    engines->removeChangeListener(this);
+    engines[0].removeChangeListener(this);
+    engines[1].removeChangeListener(this);
     waveForm.removeChangeListener(this);
 }
 
@@ -78,7 +80,10 @@ void LoadingComponent::loadFile()
     if (fileChooser.browseForFileToOpen())
     {
         auto fileURL = fileChooser.getURLResult();
-        engines->loadSampleFromUrl(fileURL);
+
+        engines[0].loadSampleFromUrl(fileURL);
+        engines[1].loadSampleFromUrl(fileURL);
+
         auto *input = new juce::URLInputSource(fileChooser.getURLResult());
         waveForm.loadAudio(input);
     }
@@ -91,23 +96,26 @@ void LoadingComponent::changeListenerCallback(ChangeBroadcaster *source)
         waveForm.setRelativePosition(waveForm.getLastRelativeClick());
         if (waveForm.isLooping())
         {
-            engines->setRelativeSampleStart((float)waveForm.getLastRelativeClick());
-            engines->setRelativeSampleEnd((float)waveForm.getLastRelativeClick() + (float)waveForm.getRelativeLoopLength());
+            engines[0].setRelativeSampleStart((float)waveForm.getLastRelativeClick());
+            engines[1].setRelativeSampleStart((float)waveForm.getLastRelativeClick());
+            engines[0].setRelativeSampleEnd((float)waveForm.getLastRelativeClick() + (float)waveForm.getRelativeLoopLength());
+            engines[1].setRelativeSampleEnd((float)waveForm.getLastRelativeClick() + (float)waveForm.getRelativeLoopLength());
             loopStartSlider.setValue(waveForm.getLastRelativeClick());
             loopEndSlider.setValue(waveForm.getLastRelativeClick() + waveForm.getRelativeLoopLength());
         }
         else
         {
-            engines->setRelativeSampleStart((float)waveForm.getLastRelativeClick());
-            engines->setRelativeSampleEnd((float)waveForm.getLastRelativeClick());
+            engines[0].setRelativeSampleStart((float)waveForm.getLastRelativeClick());
+            engines[1].setRelativeSampleStart((float)waveForm.getLastRelativeClick());
+            engines[0].setRelativeSampleEnd((float)waveForm.getLastRelativeClick());
+            engines[1].setRelativeSampleStart((float)waveForm.getLastRelativeClick());
             loopStartSlider.setValue(waveForm.getLastRelativeClick());
             loopEndSlider.setValue(waveForm.getLastRelativeClick());
         }
     }
-    if (source == engines)
+    if (source == &engines[0])
     {
-        waveForm.clearGrains();
-        auto grainParameters = engines->getGrainParameters();
+        auto grainParameters = engines[0].getGrainParameters();
         repaint();
         if (grainParameters.size() == 0)
             return;
@@ -117,7 +125,22 @@ void LoadingComponent::changeListenerCallback(ChangeBroadcaster *source)
             float grainCurrentPosition = std::get<0>(grainParameters[i]);
             float grainVolume = std::get<1>(grainParameters[i]);
             float grainPan = std::get<2>(grainParameters[i]);
-            waveForm.addGrain(grainCurrentPosition, grainVolume, grainPan);
+            waveForm.addGrain(grainCurrentPosition, grainVolume, grainPan, juce::Colours::goldenrod);
+        }
+    }
+    if (source == &engines[1])
+    {
+        auto grainParameters = engines[1].getGrainParameters();
+        repaint();
+        if (grainParameters.size() == 0)
+            return;
+
+        for (int i = 0; i < grainParameters.size(); i++)
+        {
+            float grainCurrentPosition = std::get<0>(grainParameters[i]);
+            float grainVolume = std::get<1>(grainParameters[i]);
+            float grainPan = std::get<2>(grainParameters[i]);
+            waveForm.addGrain(grainCurrentPosition, grainVolume, grainPan, juce::Colours::palegreen);
         }
     }
 }

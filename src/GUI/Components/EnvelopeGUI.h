@@ -7,7 +7,7 @@ class EnvelopeGUI : public juce::Component,
                     public juce::ComboBox::Listener
 {
 public:
-    EnvelopeGUI(AudioProcessorValueTreeState &vts);
+    EnvelopeGUI(AudioProcessorValueTreeState &vts, String indexOfSelf = "");
     ~EnvelopeGUI() override;
 
     void paint(juce::Graphics &) override;
@@ -71,6 +71,7 @@ private:
     bool firstCall;
 
     AudioProcessorValueTreeState &vts;
+    String indexOfSelf;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EnvelopeGUI)
 };

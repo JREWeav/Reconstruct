@@ -1,12 +1,12 @@
 #include "EnvelopeGUI.h"
 
-EnvelopeGUI::EnvelopeGUI(AudioProcessorValueTreeState &vts) : vts(vts)
+EnvelopeGUI::EnvelopeGUI(AudioProcessorValueTreeState &vts, String indexOfSelf) : vts(vts), indexOfSelf(indexOfSelf)
 {
     addAndMakeVisible(envelopeType);
     envelopeType.addListener(this);
-    envelopeTypeAttachment = std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(vts, "ENVELOPE_TYPE", envelopeType);
+    envelopeTypeAttachment = std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(vts, "ENVELOPE_TYPE" + indexOfSelf, envelopeType);
     envelopeType.addItemList({"ADSR", "ASR", "Hamming", "Hann", "Blackman", "White Noise"}, 1);
-    envelopeType.setSelectedId(vts.getRawParameterValue("ENVELOPE_TYPE")->load() + 1);
+    envelopeType.setSelectedId(vts.getRawParameterValue("ENVELOPE_TYPE" + indexOfSelf)->load() + 1);
     envelope.type = envelopeType.getSelectedId();
 
     firstCall = true;
@@ -243,34 +243,34 @@ void EnvelopeGUI::mouseUp(const juce::MouseEvent &event)
 void EnvelopeGUI::updateVTS()
 {
     // Update VTS with new values
-    vts.getParameter("GRAIN_ATTACK")->beginChangeGesture();
-    vts.getParameter("GRAIN_ATTACK")->setValueNotifyingHost(envelope.attack);
-    vts.getParameter("GRAIN_ATTACK")->endChangeGesture();
+    vts.getParameter("GRAIN_ATTACK" + indexOfSelf)->beginChangeGesture();
+    vts.getParameter("GRAIN_ATTACK" + indexOfSelf)->setValueNotifyingHost(envelope.attack);
+    vts.getParameter("GRAIN_ATTACK" + indexOfSelf)->endChangeGesture();
 
-    vts.getParameter("GRAIN_PEAK")->beginChangeGesture();
-    vts.getParameter("GRAIN_PEAK")->setValueNotifyingHost(envelope.peak);
-    vts.getParameter("GRAIN_PEAK")->endChangeGesture();
+    vts.getParameter("GRAIN_PEAK" + indexOfSelf)->beginChangeGesture();
+    vts.getParameter("GRAIN_PEAK" + indexOfSelf)->setValueNotifyingHost(envelope.peak);
+    vts.getParameter("GRAIN_PEAK" + indexOfSelf)->endChangeGesture();
 
-    vts.getParameter("GRAIN_DECAY")->beginChangeGesture();
-    vts.getParameter("GRAIN_DECAY")->setValueNotifyingHost(envelope.decay);
-    vts.getParameter("GRAIN_DECAY")->endChangeGesture();
+    vts.getParameter("GRAIN_DECAY" + indexOfSelf)->beginChangeGesture();
+    vts.getParameter("GRAIN_DECAY" + indexOfSelf)->setValueNotifyingHost(envelope.decay);
+    vts.getParameter("GRAIN_DECAY" + indexOfSelf)->endChangeGesture();
 
-    vts.getParameter("GRAIN_SUSTAIN")->beginChangeGesture();
-    vts.getParameter("GRAIN_SUSTAIN")->setValueNotifyingHost(envelope.sustain);
-    vts.getParameter("GRAIN_SUSTAIN")->endChangeGesture();
+    vts.getParameter("GRAIN_SUSTAIN" + indexOfSelf)->beginChangeGesture();
+    vts.getParameter("GRAIN_SUSTAIN" + indexOfSelf)->setValueNotifyingHost(envelope.sustain);
+    vts.getParameter("GRAIN_SUSTAIN" + indexOfSelf)->endChangeGesture();
 
-    vts.getParameter("GRAIN_RELEASE")->beginChangeGesture();
-    vts.getParameter("GRAIN_RELEASE")->setValueNotifyingHost(envelope.release);
-    vts.getParameter("GRAIN_RELEASE")->endChangeGesture();
+    vts.getParameter("GRAIN_RELEASE" + indexOfSelf)->beginChangeGesture();
+    vts.getParameter("GRAIN_RELEASE" + indexOfSelf)->setValueNotifyingHost(envelope.release);
+    vts.getParameter("GRAIN_RELEASE" + indexOfSelf)->endChangeGesture();
 }
 
 void EnvelopeGUI::recallVTS()
 {
-    envelope.attack = vts.getParameter("GRAIN_ATTACK")->getValue();
-    envelope.peak = vts.getParameter("GRAIN_PEAK")->getValue();
-    envelope.decay = vts.getParameter("GRAIN_DECAY")->getValue();
-    envelope.sustain = vts.getParameter("GRAIN_SUSTAIN")->getValue();
-    envelope.release = vts.getParameter("GRAIN_RELEASE")->getValue();
+    envelope.attack = vts.getParameter("GRAIN_ATTACK" + indexOfSelf)->getValue();
+    envelope.peak = vts.getParameter("GRAIN_PEAK" + indexOfSelf)->getValue();
+    envelope.decay = vts.getParameter("GRAIN_DECAY" + indexOfSelf)->getValue();
+    envelope.sustain = vts.getParameter("GRAIN_SUSTAIN" + indexOfSelf)->getValue();
+    envelope.release = vts.getParameter("GRAIN_RELEASE" + indexOfSelf)->getValue();
 }
 // Getters
 

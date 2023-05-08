@@ -44,14 +44,16 @@ public:
     //==============================================================================
     // AudioProcessorValueTreeState
 
-    AudioProcessorValueTreeState vts;
-    AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+    AudioProcessorValueTreeState globalVTS;
+    AudioProcessorValueTreeState granularVTS[2];
+    AudioProcessorValueTreeState::ParameterLayout createGlobalParameterLayout();
+    AudioProcessorValueTreeState::ParameterLayout createGranularParameterLayout(int index);
 
 private:
     //==============================================================================
 
     AudioFormatManager formatManager;
-    GranularEngine granularEngines[1];
+    GranularEngine granularEngines[2];
     const int numVoices = 100;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
 };

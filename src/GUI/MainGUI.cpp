@@ -1,31 +1,42 @@
 #include "MainGUI.h"
 
-MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, GranularEngine &g) : engine{g},
-                                                                                                              grainVolumeRandomnessSlider{engine.vts, "GRAIN_VOLUME_RANDOMNESS", "GRAIN_VOLUME_DIRECTION", [](double value)
-                                                                                                                                          {
-                                                                                                                                              return juce::String((int)ceil(value)) + "%";
-                                                                                                                                          }},
-                                                                                                              grainLengthRandomnessSlider{engine.vts, "GRAIN_LENGTH_RANDOMNESS", "GRAIN_LENGTH_DIRECTION", [](double value)
-                                                                                                                                          {
-                                                                                                                                              return juce::String((int)ceil(value)) + "ms";
-                                                                                                                                          }},
-                                                                                                              grainSpeedRandomnessSlider{engine.vts, "GRAIN_SPEED_RANDOMNESS", "GRAIN_SPEED_DIRECTION", [](double value)
-                                                                                                                                         {
-                                                                                                                                             return juce::String((int)ceil(value)) + "%";
-                                                                                                                                         }},
-                                                                                                              grainPanRandomnessSlider{engine.vts, "GRAIN_PAN_RANDOMNESS", "GRAIN_PAN_DIRECTION", [](double value)
-                                                                                                                                       {
-                                                                                                                                           return "L " + juce::String((int)ceil(value)) + " R";
-                                                                                                                                       }},
-                                                                                                              envelope{engine.vts}
+MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, GranularEngine &g, String indexOfSelf) : engine{g},
+                                                                                                                                  indexOfSelf(indexOfSelf),
+                                                                                                                                  grainVolumeRandomnessSlider{engine.granularVTS, "GRAIN_VOLUME_RANDOMNESS" + indexOfSelf, "GRAIN_VOLUME_DIRECTION" + indexOfSelf, [](double value)
+                                                                                                                                                              {
+                                                                                                                                                                  return juce::String((int)ceil(value)) + "%";
+                                                                                                                                                              }},
+                                                                                                                                  grainLengthRandomnessSlider{engine.granularVTS, "GRAIN_LENGTH_RANDOMNESS" + indexOfSelf, "GRAIN_LENGTH_DIRECTION" + indexOfSelf, [](double value)
+                                                                                                                                                              {
+                                                                                                                                                                  return juce::String((int)ceil(value)) + "ms";
+                                                                                                                                                              }},
+                                                                                                                                  grainSpeedRandomnessSlider{engine.granularVTS, "GRAIN_SPEED_RANDOMNESS" + indexOfSelf, "GRAIN_SPEED_DIRECTION" + indexOfSelf, [](double value)
+                                                                                                                                                             {
+                                                                                                                                                                 return juce::String((int)ceil(value)) + "%";
+                                                                                                                                                             }},
+                                                                                                                                  grainPanRandomnessSlider{engine.granularVTS, "GRAIN_PAN_RANDOMNESS" + indexOfSelf, "GRAIN_PAN_DIRECTION" + indexOfSelf, [](double value)
+                                                                                                                                                           {
+                                                                                                                                                               return "L " + juce::String((int)ceil(value)) + " R";
+                                                                                                                                                           }},
+                                                                                                                                  envelope{engine.granularVTS, indexOfSelf}
 {
+    // Toggle button
+    addAndMakeVisible(onOffButton);
+    onOffButton.addListener(this);
+    onOffButton.setToggleState(engine.granularVTS.getRawParameterValue("ON_OFF" + indexOfSelf)->load(), juce::dontSendNotification);
+    addAndMakeVisible(onOffLabel);
+    onOffLabel.setText("On/Off", juce::dontSendNotification);
+    onOffLabel.attachToComponent(&onOffButton, false);
+    onOffLabel.setJustificationType(juce::Justification::centred);
+
     // Grains per second
     addAndMakeVisible(grainDensitySlider);
     grainDensitySlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
     grainDensitySlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
-    grainDensityAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.vts, "GRAIN_DENSITY", grainDensitySlider);
+    DBG("GRAIN_DENSITY" + indexOfSelf);
+    grainDensityAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.granularVTS, "GRAIN_DENSITY" + indexOfSelf, grainDensitySlider);
     grainDensitySlider.addListener(this);
-    grainDensitySlider.setValue(engine.vts.getRawParameterValue("GRAIN_DENSITY")->load());
+    grainDensitySlider.setValue(engine.granularVTS.getRawParameterValue("GRAIN_DENSITY" + indexOfSelf)->load());
     grainDensitySlider.textFromValueFunction = [](double value)
     {
         return juce::String(value, 2);
@@ -40,9 +51,9 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     addAndMakeVisible(grainVolumeSlider);
     grainVolumeSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
     grainVolumeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
-    grainVolumeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.vts, "GRAIN_VOLUME", grainVolumeSlider);
+    grainVolumeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.granularVTS, "GRAIN_VOLUME" + indexOfSelf, grainVolumeSlider);
     grainVolumeSlider.addListener(this);
-    grainVolumeSlider.setValue(engine.vts.getRawParameterValue("GRAIN_VOLUME")->load());
+    grainVolumeSlider.setValue(engine.granularVTS.getRawParameterValue("GRAIN_VOLUME" + indexOfSelf)->load());
     grainVolumeSlider.textFromValueFunction = [](double value)
     {
         return juce::String((int)ceil(value)) + "%";
@@ -56,9 +67,9 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     addAndMakeVisible(grainLengthSlider);
     grainLengthSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
     grainLengthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
-    grainLengthAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.vts, "GRAIN_LENGTH", grainLengthSlider);
+    grainLengthAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.granularVTS, "GRAIN_LENGTH" + indexOfSelf, grainLengthSlider);
     grainLengthSlider.addListener(this);
-    grainLengthSlider.setValue(engine.vts.getRawParameterValue("GRAIN_LENGTH")->load());
+    grainLengthSlider.setValue(engine.granularVTS.getRawParameterValue("GRAIN_LENGTH" + indexOfSelf)->load());
     grainLengthSlider.textFromValueFunction = [](double value)
     {
         return juce::String((int)ceil(value)) + "ms";
@@ -72,9 +83,9 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     addAndMakeVisible(grainSpeedSlider);
     grainSpeedSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
     grainSpeedSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
-    grainSpeedAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.vts, "GRAIN_SPEED", grainSpeedSlider);
+    grainSpeedAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.granularVTS, "GRAIN_SPEED" + indexOfSelf, grainSpeedSlider);
     grainSpeedSlider.addListener(this);
-    grainSpeedSlider.setValue(engine.vts.getRawParameterValue("GRAIN_SPEED")->load());
+    grainSpeedSlider.setValue(engine.granularVTS.getRawParameterValue("GRAIN_SPEED" + indexOfSelf)->load());
     grainSpeedSlider.textFromValueFunction = [](double value)
     {
         return juce::String((int)ceil(value)) + "%";
@@ -88,16 +99,16 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     addAndMakeVisible(grainPanSlider);
     grainPanSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
     grainPanSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
-    grainPanAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.vts, "GRAIN_PAN", grainPanSlider);
+    grainPanAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.granularVTS, "GRAIN_PAN" + indexOfSelf, grainPanSlider);
     grainPanSlider.addListener(this);
-    grainPanSlider.setValue(engine.vts.getRawParameterValue("GRAIN_PAN")->load());
+    grainPanSlider.setValue(engine.granularVTS.getRawParameterValue("GRAIN_PAN" + indexOfSelf)->load());
     grainPanSlider.textFromValueFunction = [](double value)
     {
         return "L  " + juce::String((int)ceil(value)) + "  R";
     };
     grainPanSlider.updateText();
     addAndMakeVisible(grainPanLabel);
-    grainPanLabel.setText("Grain pan (%)", juce::dontSendNotification);
+    grainPanLabel.setText("Grain Pan", juce::dontSendNotification);
     grainPanLabel.attachToComponent(&grainPanSlider, false);
     grainPanLabel.setJustificationType(juce::Justification::centred);
 
@@ -105,7 +116,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
 
     addAndMakeVisible(grainVolumeRandomnessSlider);
     grainVolumeRandomnessSlider.addChangeListener(this);
-    grainVolumeRandomnessSlider.setValue(engine.vts.getRawParameterValue("GRAIN_VOLUME_RANDOMNESS")->load());
+    grainVolumeRandomnessSlider.setValue(engine.granularVTS.getRawParameterValue("GRAIN_VOLUME_RANDOMNESS" + indexOfSelf)->load());
     grainVolumeRandomnessSlider.updateText();
     addAndMakeVisible(grainVolumeRandomnessLabel);
     grainVolumeRandomnessLabel.setText("Volume Offset", juce::dontSendNotification);
@@ -114,7 +125,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
 
     addAndMakeVisible(grainLengthRandomnessSlider);
     grainLengthRandomnessSlider.addChangeListener(this);
-    grainLengthRandomnessSlider.setValue(engine.vts.getRawParameterValue("GRAIN_LENGTH_RANDOMNESS")->load());
+    grainLengthRandomnessSlider.setValue(engine.granularVTS.getRawParameterValue("GRAIN_LENGTH_RANDOMNESS" + indexOfSelf)->load());
     grainLengthRandomnessSlider.updateText();
     addAndMakeVisible(grainLengthRandomnessLabel);
     grainLengthRandomnessLabel.setText("Length Offset", juce::dontSendNotification);
@@ -123,7 +134,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
 
     addAndMakeVisible(grainSpeedRandomnessSlider);
     grainSpeedRandomnessSlider.addChangeListener(this);
-    grainSpeedRandomnessSlider.setValue(engine.vts.getRawParameterValue("GRAIN_SPEED_RANDOMNESS")->load());
+    grainSpeedRandomnessSlider.setValue(engine.granularVTS.getRawParameterValue("GRAIN_SPEED_RANDOMNESS" + indexOfSelf)->load());
     grainSpeedRandomnessSlider.updateText();
     addAndMakeVisible(grainSpeedRandomnessLabel);
     grainSpeedRandomnessLabel.setText("Speed Offset", juce::dontSendNotification);
@@ -132,7 +143,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
 
     addAndMakeVisible(grainPanRandomnessSlider);
     grainPanRandomnessSlider.addChangeListener(this);
-    grainPanRandomnessSlider.setValue(engine.vts.getRawParameterValue("GRAIN_PAN_RANDOMNESS")->load());
+    grainPanRandomnessSlider.setValue(engine.granularVTS.getRawParameterValue("GRAIN_PAN_RANDOMNESS" + indexOfSelf)->load());
     grainPanRandomnessSlider.updateText();
     addAndMakeVisible(grainPanRandomnessLabel);
     grainPanRandomnessLabel.setText("Pan Offset", juce::dontSendNotification);
@@ -172,6 +183,9 @@ void MainGUI::resized()
     // 16:10 setup
     int getW = (getWidth() / 32);
     int getH = (getHeight() / 10);
+
+    // on / off
+    onOffButton.setBounds(getW * 2, getH, getW * 2, getH);
 
     // Grains per second
     grainDensitySlider.setBounds(getW * 2, getH * 3, getW * 4, getH * 4);
@@ -229,6 +243,13 @@ void MainGUI::changeListenerCallback(juce::ChangeBroadcaster *source)
 
 void MainGUI::buttonClicked(juce::Button *button)
 {
+    if (button == &onOffButton)
+    {
+        engine.setEngineOn(onOffButton.getToggleState());
+        engine.granularVTS.getParameter("ON_OFF" + indexOfSelf)->beginChangeGesture();
+        engine.granularVTS.getParameter("ON_OFF" + indexOfSelf)->setValueNotifyingHost(onOffButton.getToggleState());
+        engine.granularVTS.getParameter("ON_OFF" + indexOfSelf)->endChangeGesture();
+    }
 }
 
 void MainGUI::sliderValueChanged(juce::Slider *slider)

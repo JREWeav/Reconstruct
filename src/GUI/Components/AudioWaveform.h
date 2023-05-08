@@ -32,7 +32,7 @@ public:
 
     // Grain drawing
     void drawGrains(juce::Graphics &g);
-    void addGrain(float relativePosition, float pan, float volume);
+    void addGrain(float relativePosition, float pan, float volume, juce::Colour colour);
     void clearGrains();
 
     //==============================================================================
@@ -50,6 +50,7 @@ private:
         float relativePosition;
         float pan;
         float volume;
+        juce::Colour colour;
     };
 
     std::vector<Grain> grains;

@@ -8,7 +8,7 @@ class GranularEngine : public juce::AudioProcessor,
 {
 public:
     //==============================================================================
-    GranularEngine(AudioFormatManager &formatManager, AudioProcessorValueTreeState &vts);
+    GranularEngine(AudioFormatManager &formatManager, AudioProcessorValueTreeState &globalVTS, AudioProcessorValueTreeState &granularVTS);
     ~GranularEngine() override;
     //==============================================================================
 
@@ -22,7 +22,8 @@ public:
     void processBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &) override;
     using AudioProcessor::processBlock;
 
-    AudioProcessorValueTreeState &vts;
+    AudioProcessorValueTreeState &globalVTS;
+    AudioProcessorValueTreeState &granularVTS;
 
     //==============================================================================
 
@@ -54,10 +55,11 @@ public:
 
     void loadSampleFromUrl(juce::URL &url);
 
+    // Setter for on / off
+    void setEngineOn(bool state);
     // Setters for sample parameters
     void setRelativeSampleStart(float sampleStart);
     void setRelativeSampleEnd(float sampleEnd);
-
     void setGrainDensity(float _grainDensity);
 
     // Setters for grain parameters
@@ -93,6 +95,8 @@ public:
 
 private:
     //==============================================================================
+    bool engineOn;
+    // Grain pool
     std::vector<Grain *> grainPool;
     juce::AudioFormatManager &formatManager;
     std::unique_ptr<AudioSampleBuffer> sampleBuffer;

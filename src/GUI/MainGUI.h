@@ -11,17 +11,20 @@ class MainGUI : public juce::Component,
                 public juce::ChangeListener
 {
 public:
-    MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, GranularEngine &g);
+    MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, GranularEngine &g, String indexOfSelf = "");
     ~MainGUI() override;
 
     void paint(juce::Graphics &) override;
     void resized() override;
     void buttonClicked(Button *) override;
     void sliderValueChanged(Slider *) override;
-
     void changeListenerCallback(ChangeBroadcaster *source) override;
 
 private:
+    // Toggle button
+    ToggleButton onOffButton;
+    Label onOffLabel;
+
     // Look and feel
     const int numVoices = 8;
     URL audioURL;
@@ -72,6 +75,8 @@ private:
     {
         return String(value, 2);
     };
+
+    String indexOfSelf;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainGUI)
 };

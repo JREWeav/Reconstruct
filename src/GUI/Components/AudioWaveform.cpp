@@ -56,6 +56,8 @@ void AudioWaveform::paint(juce::Graphics &g)
         g.fillRect(0, 0, 100, 15);
         g.setColour(Colours::white);
         g.drawText(timeFromSecs(curPos * audioThumb.getTotalLength()) + "/" + timeFromSecs(audioThumb.getTotalLength()), 0, 0, 100, 15, Justification::centred);
+
+        clearGrains();
     }
     else
     {
@@ -73,7 +75,7 @@ void AudioWaveform::drawGrains(juce::Graphics &g)
     for (auto grain : grains)
     {
         g.setOpacity(0.3);
-        g.setColour(Colours::goldenrod);
+        g.setColour(grain.colour);
         float relativePosition = jmax(grain.relativePosition, 0.0f);
         int x = (int)(grain.relativePosition * getWidth());
         x = jmin(x, getWidth());
@@ -88,12 +90,13 @@ void AudioWaveform::drawGrains(juce::Graphics &g)
     }
 }
 
-void AudioWaveform::addGrain(float relativePosition, float volume, float pan)
+void AudioWaveform::addGrain(float relativePosition, float volume, float pan, juce::Colour colour)
 {
     Grain grain;
     grain.relativePosition = relativePosition;
     grain.volume = volume;
     grain.pan = pan;
+    grain.colour = colour;
     grains.push_back(grain);
 }
 

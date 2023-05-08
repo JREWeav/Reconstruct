@@ -2,9 +2,10 @@
 
 //==============================================================================
 
-GranularEngine::GranularEngine(AudioFormatManager &formatManager, AudioProcessorValueTreeState &vts)
-    : AudioProcessor(BusesProperties()), formatManager(formatManager), vts(vts)
+GranularEngine::GranularEngine(AudioFormatManager &formatManager, AudioProcessorValueTreeState &globalVTS, AudioProcessorValueTreeState &granularVTS)
+    : AudioProcessor(BusesProperties()), formatManager(formatManager), globalVTS(globalVTS), granularVTS(granularVTS)
 {
+    engineOn = true;
     processedSamples = 0;
 
     grainDensity = 0;
@@ -42,13 +43,11 @@ void GranularEngine::releaseResources()
 
 void GranularEngine::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMessages)
 {
-    if (!fileLoaded)
+    if (!fileLoaded || !engineOn)
         return;
 
     // Get the number of samples in the buffer
     storedBufferSize = buffer.getNumSamples();
-    // Clear the buffer
-    buffer.clear();
     // Get the number of samples in the buffer
     const int numSamples = buffer.getNumSamples();
     int samplesToProcess = numSamples;
@@ -215,6 +214,13 @@ AudioProcessorEditor *GranularEngine::createEditor()
 }
 
 //==============================================================================
+
+// State
+
+void GranularEngine::setEngineOn(bool state)
+{
+    engineOn = state;
+}
 
 // Sample parameters
 void GranularEngine::setRelativeSampleStart(float start)
