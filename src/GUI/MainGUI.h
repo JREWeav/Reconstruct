@@ -1,10 +1,9 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include "LoadingComponent.h"
-#include "../AudioProcessing/PluginProcessor.h"
-#include "../LookAndFeel/ReconLookAndFeel.h"
-#include "EnvelopeGUI.h"
+#include "Components/EnvelopeGUI.h"
+#include "../AudioProcessing/GranularEngine.h"
+#include "Components/RandomnessDial.h"
 
 class MainGUI : public juce::Component,
                 public juce::Button::Listener,
@@ -12,7 +11,7 @@ class MainGUI : public juce::Component,
                 public juce::ChangeListener
 {
 public:
-    MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, AudioPluginAudioProcessor &p);
+    MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbnailCache, GranularEngine &g);
     ~MainGUI() override;
 
     void paint(juce::Graphics &) override;
@@ -24,39 +23,55 @@ public:
 
 private:
     // Look and feel
-    ReconLookAndFeel customLookAndFeel;
-
-    LoadingComponent loadComponent;
     const int numVoices = 8;
     URL audioURL;
-    AudioPluginAudioProcessor &processor;
+    GranularEngine &engine;
 
     // Grains per second
-    juce::Slider grainsPerSecondSlider;
-    juce::Label grainsPerSecondLabel;
+    Slider grainDensitySlider;
+    Label grainDensityLabel;
 
     // Grain parameters
-    juce::Slider grainLengthSlider;
-    juce::Label grainLengthLabel;
-    juce::Slider grainSpeedSlider;
-    juce::Label grainSpeedLabel;
-    juce::Slider grainPanSlider;
-    juce::Label grainPanLabel;
-    juce::Slider grainVolumeSlider;
-    juce::Label grainVolumeLabel;
+    Slider grainLengthSlider;
+    Label grainLengthLabel;
+    Slider grainSpeedSlider;
+    Label grainSpeedLabel;
+    Slider grainPanSlider;
+    Label grainPanLabel;
+    Slider grainVolumeSlider;
+    Label grainVolumeLabel;
 
     // Grain Randomness
-    juce::Slider grainLengthRandomnessSlider;
-    juce::Label grainLengthRandomnessLabel;
-    juce::Slider grainSpeedRandomnessSlider;
-    juce::Label grainSpeedRandomnessLabel;
-    juce::Slider grainPanRandomnessSlider;
-    juce::Label grainPanRandomnessLabel;
-    juce::Slider grainVolumeRandomnessSlider;
-    juce::Label grainVolumeRandomnessLabel;
+
+    RandomnessDial grainVolumeRandomnessSlider;
+    Label grainVolumeRandomnessLabel;
+    RandomnessDial grainLengthRandomnessSlider;
+    Label grainLengthRandomnessLabel;
+    RandomnessDial grainSpeedRandomnessSlider;
+    Label grainSpeedRandomnessLabel;
+    RandomnessDial grainPanRandomnessSlider;
+    Label grainPanRandomnessLabel;
 
     // Envelope
     EnvelopeGUI envelope;
+
+    // Slider attachments
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainDensityAttachment;
+
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainVolumeAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainLengthAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainSpeedAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainPanAttachment;
+
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainVolumeRandomnessAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainLengthRandomnessAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainSpeedRandomnessAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> grainPanRandomnessAttachment;
+
+    auto textFromValue(double value) -> String
+    {
+        return String(value, 2);
+    };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainGUI)
 };

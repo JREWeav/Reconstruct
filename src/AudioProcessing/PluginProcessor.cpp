@@ -10,12 +10,15 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor()
 #endif
                          .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
-      )
+                         ),
+      vts(*this, nullptr, "PARAMETERS", createParameterLayout()), granularEngines{GranularEngine(formatManager, vts)}
 {
+    formatManager.registerBasicFormats();
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
 {
+    formatManager.clearFormats();
 }
 
 //==============================================================================
@@ -86,7 +89,7 @@ void AudioPluginAudioProcessor::changeProgramName(int index, const juce::String 
 //==============================================================================
 void AudioPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    granularEngine.prepareToPlay(sampleRate, samplesPerBlock);
+    granularEngines->prepareToPlay(sampleRate, samplesPerBlock);
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -137,53 +140,63 @@ void AudioPluginAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, j
     for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    granularEngine.processBlock(buffer, midiMessages);
+    granularEngines->processBlock(buffer, midiMessages);
 }
 
-//================
+// Create AudioProcessorValueTreeState
 
-void AudioPluginAudioProcessor::loadSampleFromUrl(juce::URL &url)
+AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createParameterLayout()
 {
-    granularEngine.loadSampleFromUrl(url);
-}
+    std::vector<std::unique_ptr<RangedAudioParameter>> params;
 
-void AudioPluginAudioProcessor::setGrainsPerSecond(float grainsPerSecond)
-{
-    granularEngine.setGrainsPerSecond(grainsPerSecond);
-}
+    auto stringFromValue = [](float value, int maximumStringLength) -> juce::String
+    { return juce::String(value, maximumStringLength) + "%"; };
 
-void AudioPluginAudioProcessor::setGrainParameters(float grainVolume, int grainLengthInMs, float grainPan, float grainSpeed)
-{
-    granularEngine.setGrainVolume(grainVolume);
-    granularEngine.setGrainLengthInMs(grainLengthInMs);
-    granularEngine.setGrainPan(grainPan);
-    granularEngine.setGrainSpeed(grainSpeed);
-}
+    auto valueFromString = [](const juce::String &text) -> float
+    { return text.dropLastCharacters(1).getFloatValue(); };
 
-void AudioPluginAudioProcessor::setRandomParameters(float randomGrainVolume, int randomGrainLengthInMs, float randomGrainSpeed, float randomGrainPan)
-{
-    granularEngine.setRandomGrainVolume(randomGrainVolume);
-    granularEngine.setRandomGrainLengthInMs(randomGrainLengthInMs);
-    granularEngine.setRandomGrainSpeed(randomGrainSpeed);
-    granularEngine.setRandomGrainPan(randomGrainPan);
-}
+    // Samples Begin and End
+    params.push_back(std::make_unique<AudioParameterFloat>("SAMPLE_START", "Sample Start", NormalisableRange<float>(0.0f, 1.0f), 0.0f));
+    params.push_back(std::make_unique<AudioParameterFloat>("SAMPLE_END", "Sample End", NormalisableRange<float>(0.0f, 1.0f), 0.0f));
 
-void AudioPluginAudioProcessor::setEnvelopeParameters(int type, float attack, float peak, float decay, float sustain, float release)
-{
-    granularEngine.setEnvelopeParameters(type, attack, peak, decay, sustain, release);
-}
+    // Grain Density
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_DENSITY", "Grain Density", NormalisableRange<float>(0.1f, 5.0f), 0.1f));
 
-void AudioPluginAudioProcessor::setSampleParameters(float sampleStart, float sampleEnd)
-{
-    granularEngine.setRelativeSampleStart(sampleStart);
-    granularEngine.setRelativeSampleEnd(sampleEnd);
-}
+    // Voices
+    // params.push_back(std::make_unique<AudioParameterInt>("NUM_VOICES", "Number of Voices", 1, 1000, 1));
 
-// Get grain parameters
+    // Grain Parameters
+    params.push_back(std::make_unique<AudioParameterFloat>(
+        "GRAIN_VOLUME", "Grain Volume", 0, 100, 50));
 
-std::vector<std::tuple<float, float, float>> AudioPluginAudioProcessor::getGrainParameters()
-{
-    return granularEngine.getGrainParameters();
+    params.push_back(std::make_unique<AudioParameterFloat>(
+        "GRAIN_LENGTH", "Grain Length", 20, 500, 100));
+
+    params.push_back(std::make_unique<AudioParameterFloat>(
+        "GRAIN_SPEED", "Grain Speed", 1, 500, 100));
+
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_PAN", "Grain Pan", 0, 100, 50));
+
+    // Grain Randomization
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_VOLUME_RANDOMNESS", "Grain Volume Randomization", 0, 100, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_VOLUME_DIRECTION", "Grain Volume Direction", 0, 2, 1));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_LENGTH_RANDOMNESS", "Grain Length Randomization", 0, 500, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_LENGTH_DIRECTION", "Grain Length Direction", 0, 2, 1));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_SPEED_RANDOMNESS", "Grain Speed Randomization", 0, 300, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_SPEED_DIRECTION", "Grain Speed Direction", 0, 2, 1));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_PAN_RANDOMNESS", "Grain Pan Randomization", 0, 100, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_PAN_DIRECTION", "Grain Pan Direction", 0, 2, 1));
+
+    // Grain Envelope
+    StringArray envelopeTypes = {"ADSR", "ASR", "Hamming", "Hann", "Blackman", "White Noise"};
+    params.push_back(std::make_unique<AudioParameterChoice>("ENVELOPE_TYPE", "Envelope Type", envelopeTypes, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_ATTACK", "Grain Attack", 0.0f, 1.0f, 0.2f));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_PEAK", "Grain Peak", 0.0f, 1.0f, 1.0f));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_DECAY", "Grain Decay", 0.0f, 1.0f, 0.2f));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_SUSTAIN", "Grain Sustain", 0.0f, 1.0f, 0.5f));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_RELEASE", "Grain Release", 0.0f, 1.0f, 0.2f));
+
+    return {params.begin(), params.end()};
 }
 
 //==============================================================================
@@ -194,7 +207,7 @@ bool AudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor *AudioPluginAudioProcessor::createEditor()
 {
-    return new AudioPluginAudioProcessorEditor(*this, formatManager);
+    return new AudioPluginAudioProcessorEditor(*this, granularEngines, formatManager);
 }
 
 //==============================================================================

@@ -3,14 +3,17 @@
 #include <JuceHeader.h>
 #include "Grain.h"
 
-class GranularEngine : public juce::AudioProcessor
+class GranularEngine : public juce::AudioProcessor,
+                       public juce::ChangeBroadcaster
 {
 public:
     //==============================================================================
-    GranularEngine(juce::AudioFormatManager &formatManager);
+    GranularEngine(AudioFormatManager &formatManager, AudioProcessorValueTreeState &vts);
     ~GranularEngine() override;
+    //==============================================================================
 
     //==============================================================================
+    // AudioProcessor
     void prepareToPlay(double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
 
@@ -19,11 +22,15 @@ public:
     void processBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &) override;
     using AudioProcessor::processBlock;
 
+    AudioProcessorValueTreeState &vts;
+
     //==============================================================================
+
     juce::AudioProcessorEditor *createEditor() override;
     bool hasEditor() const override;
 
     //==============================================================================
+    // Setup
     const juce::String getName() const override;
 
     bool acceptsMidi() const override;
@@ -43,13 +50,15 @@ public:
     void setStateInformation(const void *data, int sizeInBytes) override;
     //==============================================================================
 
+    // Load sample from file
+
     void loadSampleFromUrl(juce::URL &url);
 
     // Setters for sample parameters
     void setRelativeSampleStart(float sampleStart);
     void setRelativeSampleEnd(float sampleEnd);
 
-    void setGrainsPerSecond(float grainsPerSecond);
+    void setGrainDensity(float _grainDensity);
 
     // Setters for grain parameters
     void setGrainVolume(float _grainVolume);
@@ -58,10 +67,10 @@ public:
     void setGrainPan(float _grainPan);
 
     // Setters for randomization
-    void setRandomGrainVolume(float _randomGrainVolume);
-    void setRandomGrainLengthInMs(int _randomGrainLengthInMs);
-    void setRandomGrainSpeed(float _randomGrainSpeed);
-    void setRandomGrainPan(float _randomGrainPan);
+    void setRandomGrainVolume(float _randomGrainVolume, int dir);
+    void setRandomGrainLengthInMs(int _randomGrainLengthInMs, int dir);
+    void setRandomGrainSpeed(float _randomGrainSpeed, int dir);
+    void setRandomGrainPan(float _randomGrainPan, int dir);
 
     // Setters for envelope
     void setEnvelopeParameters(int type, float attack, float peak, float decay, float sustain, float release);
@@ -72,17 +81,26 @@ public:
     // Getter for grain pool
     std::vector<std::tuple<float, float, float>> getGrainParameters();
 
+    int getStoredSampleRate();
+
     // Grain processing
     void generateGrain(int midiNoteNumber, float velocity, int offsetInSamples);
-    void processActiveGrains(int numSamples, AudioSampleBuffer &buffer, AudioSampleBuffer *sampleBuffer);
+    void processActiveGrains(int numSamples, AudioSampleBuffer &buffer);
+
+    // Check if sample is loaded
+    bool isFileLoaded();
+    AudioSampleBuffer *getSampleBuffer();
 
 private:
     //==============================================================================
     std::vector<Grain *> grainPool;
     juce::AudioFormatManager &formatManager;
-    AudioSampleBuffer *sampleBuffer;
+    std::unique_ptr<AudioSampleBuffer> sampleBuffer;
     float storedSampleRate;
     int processedSamples;
+    int storedBufferSize;
+
+    bool fileLoaded;
 
     Random random;
 
@@ -93,7 +111,7 @@ private:
     float sampleEnd;
 
     // Grains per second
-    float grainsPerSecond;
+    float grainDensity;
     float lastGrainTime;
     int grainTimerInSamples;
 
@@ -105,9 +123,13 @@ private:
 
     // Randomization parameters
     float randomGrainVolume;
+    int randomGrainVolumeState;
     int randomGrainLengthInMs;
+    int randomGrainLengthState;
     float randomGrainSpeed;
+    int randomGrainSpeedState;
     float randomGrainPan;
+    int randomGrainPanState;
 
     // Envelope
     struct Envelope

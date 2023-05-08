@@ -7,7 +7,7 @@ class EnvelopeGUI : public juce::Component,
                     public juce::ComboBox::Listener
 {
 public:
-    EnvelopeGUI();
+    EnvelopeGUI(AudioProcessorValueTreeState &vts);
     ~EnvelopeGUI() override;
 
     void paint(juce::Graphics &) override;
@@ -16,9 +16,13 @@ public:
     void comboBoxChanged(juce::ComboBox *) override;
 
     void mouseDown(const juce::MouseEvent &event) override;
+    void mouseUp(const juce::MouseEvent &event) override;
     void mouseDrag(const juce::MouseEvent &event) override;
 
     void calculatePoints();
+
+    void updateVTS();
+    void recallVTS();
 
     // Getters
     bool getCollapseState();
@@ -30,9 +34,10 @@ public:
     float getRelease();
 
 private:
-    juce::ComboBox envelopeType;
+    ComboBox envelopeType;
+    std::unique_ptr<AudioProcessorValueTreeState::ComboBoxAttachment> envelopeTypeAttachment;
 
-    juce::StringArray envelopeTypes{"ADSR", "ASR", "Hamming", "Hann", "Blackman", "White Noise"};
+    StringArray envelopeTypes{"ADSR", "ASR", "AR", "AHR", "AHDSR", "AHDSR2"};
 
     bool isCollapsed = true;
 
@@ -60,6 +65,12 @@ private:
     Point attackPoint;
     Point decayPoint;
     Point releasePoint;
+
+    Point *selectedPoint;
+
+    bool firstCall;
+
+    AudioProcessorValueTreeState &vts;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EnvelopeGUI)
 };

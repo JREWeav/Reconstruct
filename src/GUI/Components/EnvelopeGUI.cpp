@@ -1,18 +1,17 @@
 #include "EnvelopeGUI.h"
 
-EnvelopeGUI::EnvelopeGUI()
+EnvelopeGUI::EnvelopeGUI(AudioProcessorValueTreeState &vts) : vts(vts)
 {
     addAndMakeVisible(envelopeType);
-    envelopeType.addItemList(envelopeTypes, 1);
-    envelopeType.setSelectedId(1);
     envelopeType.addListener(this);
-
+    envelopeTypeAttachment = std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(vts, "ENVELOPE_TYPE", envelopeType);
+    envelopeType.addItemList({"ADSR", "ASR", "Hamming", "Hann", "Blackman", "White Noise"}, 1);
+    envelopeType.setSelectedId(vts.getRawParameterValue("ENVELOPE_TYPE")->load() + 1);
     envelope.type = envelopeType.getSelectedId();
-    envelope.attack = 0.2f;
-    envelope.peak = 1.0f;
-    envelope.decay = 0.2f;
-    envelope.sustain = 0.5f;
-    envelope.release = 0.2f;
+
+    firstCall = true;
+    selectedPoint = nullptr;
+    recallVTS();
 }
 
 EnvelopeGUI::~EnvelopeGUI()
@@ -105,6 +104,11 @@ void EnvelopeGUI::calculatePoints()
 
 void EnvelopeGUI::comboBoxChanged(juce::ComboBox *comboBox)
 {
+    if (firstCall)
+    {
+        firstCall = false;
+        return;
+    }
     if (comboBox == &envelopeType)
     {
         if (envelopeType.getSelectedId() == 1)
@@ -122,8 +126,8 @@ void EnvelopeGUI::comboBoxChanged(juce::ComboBox *comboBox)
             envelope.release = 0.2f;
         }
         envelope.type = envelopeType.getSelectedId();
-        sendChangeMessage();
         repaint();
+        sendChangeMessage();
     }
 }
 
@@ -152,8 +156,9 @@ void EnvelopeGUI::mouseDrag(const juce::MouseEvent &event)
     {
         if (envelopeType.getSelectedId() == 1)
         {
-            if (getMouseXYRelative().getX() > attackPoint.x - 15 && getMouseXYRelative().getX() < attackPoint.x + 15 && getMouseXYRelative().getY() > attackPoint.y - 15 && getMouseXYRelative().getY() < attackPoint.y + 15)
+            if ((getMouseXYRelative().getX() > attackPoint.x - 15 && getMouseXYRelative().getX() < attackPoint.x + 15 && getMouseXYRelative().getY() > attackPoint.y - 15 && getMouseXYRelative().getY() < attackPoint.y + 15 && selectedPoint == nullptr) || selectedPoint == &attackPoint)
             {
+                selectedPoint = &attackPoint;
                 envelope.attack = (float)getMouseXYRelative().getX() / (float)getWidth();
                 envelope.attack = jmax(0.0f, envelope.attack);
                 envelope.attack = jmin(1.0f - envelope.release - envelope.decay, envelope.attack);
@@ -161,17 +166,19 @@ void EnvelopeGUI::mouseDrag(const juce::MouseEvent &event)
                 envelope.peak = jmax(envelope.sustain, envelope.peak);
                 envelope.peak = jmin(1.0f, envelope.peak);
             }
-            else if (getMouseXYRelative().getX() > decayPoint.x - 15 && getMouseXYRelative().getX() < decayPoint.x + 15 && getMouseXYRelative().getY() > decayPoint.y - 15 && getMouseXYRelative().getY() < decayPoint.y + 15)
+            else if ((getMouseXYRelative().getX() > decayPoint.x - 15 && getMouseXYRelative().getX() < decayPoint.x + 15 && getMouseXYRelative().getY() > decayPoint.y - 15 && getMouseXYRelative().getY() < decayPoint.y + 15 && selectedPoint == nullptr) || selectedPoint == &decayPoint)
             {
-                envelope.decay = (float)getMouseXYRelative().getX() / (float)getWidth() - envelope.attack;
+                selectedPoint = &decayPoint;
+                envelope.decay = ((float)getMouseXYRelative().getX() / (float)getWidth()) - envelope.attack;
                 envelope.decay = jmax(0.0f, envelope.decay);
-                envelope.decay = jmin(1.0f - envelope.attack - envelope.decay, envelope.decay);
+                envelope.decay = jmin(1.0f - envelope.attack - envelope.release, envelope.decay);
                 envelope.sustain = 1.0f - ((float)getMouseXYRelative().getY() - heightOffset) / height;
                 envelope.sustain = jmax(0.0f, envelope.sustain);
                 envelope.sustain = jmin(envelope.peak, envelope.sustain);
             }
-            else if (getMouseXYRelative().getX() > releasePoint.x - 15 && getMouseXYRelative().getX() < releasePoint.x + 15 && getMouseXYRelative().getY() > releasePoint.y - 15 && getMouseXYRelative().getY() < releasePoint.y + 15)
+            else if ((getMouseXYRelative().getX() > releasePoint.x - 15 && getMouseXYRelative().getX() < releasePoint.x + 15 && getMouseXYRelative().getY() > releasePoint.y - 15 && getMouseXYRelative().getY() < releasePoint.y + 15 && selectedPoint == nullptr) || selectedPoint == &releasePoint)
             {
+                selectedPoint = &releasePoint;
                 envelope.release = 1.0f - (float)getMouseXYRelative().getX() / (float)getWidth();
                 envelope.release = jmax(0.0f, envelope.release);
                 envelope.release = jmin(1.0f - envelope.attack - envelope.decay, envelope.release);
@@ -182,8 +189,9 @@ void EnvelopeGUI::mouseDrag(const juce::MouseEvent &event)
         }
         else if (envelopeType.getSelectedId() == 2)
         {
-            if (getMouseXYRelative().getX() > attackPoint.x - 15 && getMouseXYRelative().getX() < attackPoint.x + 15 && getMouseXYRelative().getY() > attackPoint.y - 15 && getMouseXYRelative().getY() < attackPoint.y + 15)
+            if ((getMouseXYRelative().getX() > attackPoint.x - 15 && getMouseXYRelative().getX() < attackPoint.x + 15 && getMouseXYRelative().getY() > attackPoint.y - 15 && getMouseXYRelative().getY() < attackPoint.y + 15 && selectedPoint == nullptr) || selectedPoint == &attackPoint)
             {
+                selectedPoint = &attackPoint;
                 envelope.attack = (float)getMouseXYRelative().getX() / (float)getWidth();
                 envelope.attack = jmax(0.0f, envelope.attack);
                 envelope.attack = jmin(1.0f - envelope.release, envelope.attack);
@@ -191,8 +199,9 @@ void EnvelopeGUI::mouseDrag(const juce::MouseEvent &event)
                 envelope.sustain = jmax(0.0f, envelope.sustain);
                 envelope.sustain = jmin(1.0f, envelope.sustain);
             }
-            else if (getMouseXYRelative().getX() > releasePoint.x - 15 && getMouseXYRelative().getX() < releasePoint.x + 15 && getMouseXYRelative().getY() > releasePoint.y - 15 && getMouseXYRelative().getY() < releasePoint.y + 15)
+            else if ((getMouseXYRelative().getX() > releasePoint.x - 15 && getMouseXYRelative().getX() < releasePoint.x + 15 && getMouseXYRelative().getY() > releasePoint.y - 15 && getMouseXYRelative().getY() < releasePoint.y + 5 && selectedPoint == nullptr) || selectedPoint == &releasePoint)
             {
+                selectedPoint = &releasePoint;
                 envelope.release = 1.0f - (float)getMouseXYRelative().getX() / (float)getWidth();
                 envelope.release = jmax(0.0f, envelope.release);
                 envelope.release = jmin(1.0f - envelope.attack, envelope.release);
@@ -206,6 +215,45 @@ void EnvelopeGUI::mouseDrag(const juce::MouseEvent &event)
     }
 }
 
+void EnvelopeGUI::mouseUp(const juce::MouseEvent &event)
+{
+    selectedPoint = nullptr;
+    updateVTS();
+}
+
+// Update VTS
+void EnvelopeGUI::updateVTS()
+{
+    // Update VTS with new values
+    vts.getParameter("GRAIN_ATTACK")->beginChangeGesture();
+    vts.getParameter("GRAIN_ATTACK")->setValueNotifyingHost(envelope.attack);
+    vts.getParameter("GRAIN_ATTACK")->endChangeGesture();
+
+    vts.getParameter("GRAIN_PEAK")->beginChangeGesture();
+    vts.getParameter("GRAIN_PEAK")->setValueNotifyingHost(envelope.peak);
+    vts.getParameter("GRAIN_PEAK")->endChangeGesture();
+
+    vts.getParameter("GRAIN_DECAY")->beginChangeGesture();
+    vts.getParameter("GRAIN_DECAY")->setValueNotifyingHost(envelope.decay);
+    vts.getParameter("GRAIN_DECAY")->endChangeGesture();
+
+    vts.getParameter("GRAIN_SUSTAIN")->beginChangeGesture();
+    vts.getParameter("GRAIN_SUSTAIN")->setValueNotifyingHost(envelope.sustain);
+    vts.getParameter("GRAIN_SUSTAIN")->endChangeGesture();
+
+    vts.getParameter("GRAIN_RELEASE")->beginChangeGesture();
+    vts.getParameter("GRAIN_RELEASE")->setValueNotifyingHost(envelope.release);
+    vts.getParameter("GRAIN_RELEASE")->endChangeGesture();
+}
+
+void EnvelopeGUI::recallVTS()
+{
+    envelope.attack = vts.getParameter("GRAIN_ATTACK")->getValue();
+    envelope.peak = vts.getParameter("GRAIN_PEAK")->getValue();
+    envelope.decay = vts.getParameter("GRAIN_DECAY")->getValue();
+    envelope.sustain = vts.getParameter("GRAIN_SUSTAIN")->getValue();
+    envelope.release = vts.getParameter("GRAIN_RELEASE")->getValue();
+}
 // Getters
 
 bool EnvelopeGUI::getCollapseState()

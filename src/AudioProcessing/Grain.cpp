@@ -60,11 +60,16 @@ void Grain::updateGrain(int numSamples, AudioSampleBuffer &audioBlock, AudioSamp
 
     int playbackAmount = grainLengthInSamples - grainPlaybackPositionInSamples;
     playbackAmount = jmin(playbackAmount, numSamples);
+
     if (!offsetComplete)
     {
         if (numSamples > grainLengthInSamples - grainPlaybackPositionInSamples)
         {
             playbackAmount = grainLengthInSamples - grainPlaybackPositionInSamples;
+            if (grainOffsetInSamples + playbackAmount > audioBlock.getNumSamples())
+            {
+                playbackAmount = audioBlock.getNumSamples() - grainOffsetInSamples;
+            }
         }
         else
         {
@@ -78,13 +83,6 @@ void Grain::updateGrain(int numSamples, AudioSampleBuffer &audioBlock, AudioSamp
         const float *sampleData = sampleBuffer->getReadPointer(channel);
         float *outputData = audioBlock.getWritePointer(channel);
 
-        if (!offsetComplete)
-        {
-            for (int i = 0; i < grainOffsetInSamples; ++i)
-            {
-                outputData[i] += 0;
-            }
-        }
         for (int i = 0; i < playbackAmount; ++i)
         {
             if (grainPlaybackPositionInSamples + i >= grainLengthInSamples)
@@ -271,6 +269,18 @@ float Grain::getGrainPlaybackRate()
 float Grain::getGrainCurrentVolume()
 {
     return grainCurrentVolume;
+}
+
+float Grain::getGrainMaxVolume()
+{
+    float maxVolume = 0.0f;
+    for (int i = 0; i < grainEnvelope.size(); i++)
+    {
+        if (grainEnvelope[i] > maxVolume)
+            maxVolume = grainEnvelope[i];
+    }
+    maxVolume *= (grainVolume / 100.0f);
+    return maxVolume;
 }
 
 float Grain::getGrainPan()

@@ -39,6 +39,7 @@ public:
     float getGrainPlaybackRate();
     float getGrainPan();
     float getGrainCurrentVolume();
+    float getGrainMaxVolume();
 
     // Other
     void initGrain(AudioSampleBuffer *sampleBuffer, int type, float attack, float peak, float decay, float sustain, float release);

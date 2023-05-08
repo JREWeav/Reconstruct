@@ -1,10 +1,5 @@
 #include "AudioWaveform.h"
 
-/*
-TODO:
-- Add grains to the waveform
-*/
-
 //==============================================================================
 AudioWaveform::AudioWaveform(AudioFormatManager &formatManagerToUse, AudioThumbnailCache &cacheToUse) : audioThumb(10000, formatManagerToUse, cacheToUse)
 {
@@ -45,8 +40,11 @@ void AudioWaveform::paint(juce::Graphics &g)
         g.setOpacity(1);
         g.setColour(Colours::aliceblue);
 
-        Rectangle<int> channelRect{0, 15, getWidth(), getHeight() - 20};
+        Rectangle<int> channelRect{0, 0, getWidth(), getHeight()};
         audioThumb.drawChannel(g, channelRect, 0, audioThumb.getTotalLength(), 0, 1.0f);
+
+        // draw grains
+        drawGrains(g);
 
         // Draw Playhead
         g.setColour(Colours::red);
@@ -64,7 +62,10 @@ void AudioWaveform::paint(juce::Graphics &g)
         g.setColour(Colours::aliceblue);
         g.drawText("Audio Not Loaded", getLocalBounds(), Justification::centred);
     }
-    drawGrains(g);
+}
+
+void AudioWaveform::resized()
+{
 }
 
 void AudioWaveform::drawGrains(juce::Graphics &g)
@@ -101,10 +102,6 @@ void AudioWaveform::clearGrains()
     grains.clear();
 }
 
-void AudioWaveform::resized()
-{
-}
-
 void AudioWaveform::loadAudio(InputSource *src)
 {
     audioThumb.clear();
@@ -113,16 +110,36 @@ void AudioWaveform::loadAudio(InputSource *src)
     {
         audioThumb.sendChangeMessage();
     }
-    looping = false;
+}
+
+void AudioWaveform::loadAudio(AudioBuffer<float> *src, int sampleRate)
+{
+    audioThumb.clear();
+    loaded = true;
+    audioThumb.setSource(src, sampleRate, 0);
+
+    audioThumb.sendChangeMessage();
 }
 
 void AudioWaveform::setRelativePosition(double pos)
 {
-    if (pos != curPos)
-    {
-        curPos = pos;
-        repaint();
-    }
+    curPos = pos;
+    repaint();
+}
+
+void AudioWaveform::setRelativeClick(double pos)
+{
+    lastRelativeClick = pos;
+}
+
+void AudioWaveform::setRelativeLoopLength(double length)
+{
+    loopRelativeLength = length;
+}
+
+void AudioWaveform::setLooping(bool loop)
+{
+    looping = loop;
 }
 
 void AudioWaveform::mouseDown(const MouseEvent &event)
