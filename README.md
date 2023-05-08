@@ -1,4 +1,6 @@
-# RECONSTRUCT
+<h1 align="center">RECONSTRUCT</h1>
+
+<kbd><img src="img/imgforreadme.png" align="center" ></img></kbd>
 
 ## INFO
 

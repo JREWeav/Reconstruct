@@ -22,7 +22,6 @@ void EnvelopeGUI::paint(juce::Graphics &g)
 {
     if (envelope.type == 1 || envelope.type == 2)
     {
-
         g.fillAll(juce::Colours::aliceblue);
         height = getHeight();
         heightOffset = 21;
