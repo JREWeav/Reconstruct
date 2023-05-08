@@ -20,50 +20,59 @@ EnvelopeGUI::~EnvelopeGUI()
 
 void EnvelopeGUI::paint(juce::Graphics &g)
 {
-    g.fillAll(juce::Colours::aliceblue);
-
-    height = getHeight();
-    heightOffset = 21;
-    if (!isCollapsed)
+    if (envelope.type == 1 || envelope.type == 2)
     {
-        g.setColour(juce::Colours::firebrick);
-        g.fillRect(0, 0, (int)getWidth(), (int)heightOffset - 4);
-        g.setColour(juce::Colours::aliceblue);
-        g.drawLine(getWidth() - 17, 2, getWidth() - 2, 15, 2);
-        g.drawLine(getWidth() - 2, 2, getWidth() - 17, 15, 2);
+
+        g.fillAll(juce::Colours::aliceblue);
+        height = getHeight();
+        heightOffset = 21;
+        if (!isCollapsed)
+        {
+            g.setColour(juce::Colours::firebrick);
+            g.fillRect(0, 0, (int)getWidth(), (int)heightOffset - 4);
+            g.setColour(juce::Colours::aliceblue);
+            g.drawLine(getWidth() - 17, 2, getWidth() - 2, 15, 2);
+            g.drawLine(getWidth() - 2, 2, getWidth() - 17, 15, 2);
+        }
+
+        g.setColour(juce::Colours::red);
+        if (isCollapsed)
+        {
+            envelopeType.setBounds(0, 0, getWidth(), getHeight() / 5);
+            heightOffset = (getHeight() / 5) + 4;
+            height -= heightOffset;
+        }
+        calculatePoints();
+        if (envelopeType.getSelectedId() == 1)
+        {
+
+            g.fillEllipse(attackPoint.x, attackPoint.y, 8, 8);
+
+            g.fillEllipse(decayPoint.x, decayPoint.y, 8, 8);
+
+            g.fillEllipse(releasePoint.x, releasePoint.y, 8, 8);
+
+            g.drawLine(0, height + heightOffset, envelope.attack * getWidth(), ((1.0f - envelope.peak) * height) + heightOffset, 2);
+            g.drawLine(envelope.attack * getWidth(), ((1.0f - envelope.peak) * height) + heightOffset, (envelope.attack + envelope.decay) * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, 2);
+            g.drawLine((envelope.attack + envelope.decay) * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, (1.0f - envelope.release) * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, 2);
+            g.drawLine((1.0f - envelope.release) * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, getWidth(), height + heightOffset, 2);
+        }
+        else if (envelopeType.getSelectedId() == 2)
+        {
+
+            g.fillEllipse(attackPoint.x, attackPoint.y, 8, 8);
+
+            g.fillEllipse(releasePoint.x, releasePoint.y, 8, 8);
+
+            g.drawLine(0, height + heightOffset, envelope.attack * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, 2);
+            g.drawLine(envelope.attack * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, (1.0f - envelope.release) * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, 2);
+            g.drawLine((1.0f - envelope.release) * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, getWidth(), height + heightOffset, 2);
+        }
     }
-
-    g.setColour(juce::Colours::red);
-    if (isCollapsed)
+    else
     {
-        heightOffset = (getHeight() / 5) + 4;
-        height -= heightOffset;
-    }
-    calculatePoints();
-    if (envelopeType.getSelectedId() == 1)
-    {
-
-        g.fillEllipse(attackPoint.x, attackPoint.y, 8, 8);
-
-        g.fillEllipse(decayPoint.x, decayPoint.y, 8, 8);
-
-        g.fillEllipse(releasePoint.x, releasePoint.y, 8, 8);
-
-        g.drawLine(0, height + heightOffset, envelope.attack * getWidth(), ((1.0f - envelope.peak) * height) + heightOffset, 2);
-        g.drawLine(envelope.attack * getWidth(), ((1.0f - envelope.peak) * height) + heightOffset, (envelope.attack + envelope.decay) * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, 2);
-        g.drawLine((envelope.attack + envelope.decay) * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, (1.0f - envelope.release) * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, 2);
-        g.drawLine((1.0f - envelope.release) * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, getWidth(), height + heightOffset, 2);
-    }
-    else if (envelopeType.getSelectedId() == 2)
-    {
-
-        g.fillEllipse(attackPoint.x, attackPoint.y, 8, 8);
-
-        g.fillEllipse(releasePoint.x, releasePoint.y, 8, 8);
-
-        g.drawLine(0, height + heightOffset, envelope.attack * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, 2);
-        g.drawLine(envelope.attack * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, (1.0f - envelope.release) * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, 2);
-        g.drawLine((1.0f - envelope.release) * getWidth(), ((1.0f - envelope.sustain) * height) + heightOffset, getWidth(), height + heightOffset, 2);
+        g.fillAll(juce::Colours::transparentWhite);
+        envelopeType.setBounds(0, ((getHeight() / 2) - (getHeight() / 5)), getWidth(), getHeight() / 5);
     }
 }
 
@@ -71,7 +80,14 @@ void EnvelopeGUI::resized()
 {
     if (isCollapsed)
     {
-        envelopeType.setBounds(0, 0, getWidth(), getHeight() / 5);
+        if (envelope.type == 1 || envelope.type == 2)
+        {
+            envelopeType.setBounds(0, 0, getWidth(), getHeight() / 5);
+        }
+        else
+        {
+            envelopeType.setBounds(0, ((getHeight() / 2) - (getHeight() / 5)), getWidth(), getHeight() / 5);
+        }
     }
     else
     {
@@ -133,6 +149,9 @@ void EnvelopeGUI::comboBoxChanged(juce::ComboBox *comboBox)
 
 void EnvelopeGUI::mouseDown(const juce::MouseEvent &event)
 {
+    if (envelope.type != 1 && envelope.type != 2)
+        return;
+
     if (isCollapsed)
     {
         if (event.getMouseDownY() > getHeight() / 5)
