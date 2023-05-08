@@ -2,12 +2,12 @@
 
 //==============================================================================
 
-RandomnessDial::RandomnessDial(AudioProcessorValueTreeState &_vts, juce::String attachmentID, std::function<String(double value)> textFromValue) : vts(_vts)
+RandomnessDial::RandomnessDial(AudioProcessorValueTreeState &_vts, juce::String sliderID, juce::String buttonID, std::function<String(double value)> textFromValue) : vts(_vts), sliderID(sliderID), buttonID(buttonID)
 {
     addAndMakeVisible(slider);
     slider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
     slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
-    attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(vts, attachmentID, slider);
+    attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(vts, sliderID, slider);
     slider.setNumDecimalPlacesToDisplay(0);
     slider.addListener(this);
     slider.textFromValueFunction = textFromValue;
@@ -19,11 +19,26 @@ RandomnessDial::RandomnessDial(AudioProcessorValueTreeState &_vts, juce::String 
     plusMinusToggle.setButtonText("+/-");
     plusMinusToggle.setRadioGroupId(1000);
     plusMinusToggle.addListener(this);
-    plusMinusToggle.setToggleState(true, juce::sendNotification);
     addAndMakeVisible(minusToggle);
     minusToggle.setButtonText("-");
     minusToggle.setRadioGroupId(1000);
     minusToggle.addListener(this);
+
+    if ((int)floor(vts.getRawParameterValue(buttonID)->load()) == 0)
+    {
+        plusToggle.setToggleState(true, juce::dontSendNotification);
+        toggleState = 0;
+    }
+    else if ((int)floor(vts.getRawParameterValue(buttonID)->load()) == 1)
+    {
+        plusMinusToggle.setToggleState(true, juce::dontSendNotification);
+        toggleState = 1;
+    }
+    else if ((int)floor(vts.getRawParameterValue(buttonID)->load()) == 2)
+    {
+        minusToggle.setToggleState(true, juce::dontSendNotification);
+        toggleState = 2;
+    }
 }
 
 RandomnessDial::~RandomnessDial()
@@ -39,7 +54,7 @@ void RandomnessDial::resized()
 {
     auto getW = getWidth() / 3;
     auto getH = getHeight() / 4;
-    slider.setBounds(0, 10, getW * 3, getH * 3);
+    slider.setBounds(0, 0, getW * 3, getH * 3);
     plusToggle.setBounds(0, getH * 3, getW, getH);
     plusMinusToggle.setBounds(getW, getH * 3, getW, getH);
     minusToggle.setBounds(getW * 2, getH * 3, getW, getH);
@@ -73,18 +88,21 @@ void RandomnessDial::buttonClicked(Button *button)
     if (button == &plusToggle)
     {
         toggleState = 0;
-        sendChangeMessage();
     }
     else if (button == &plusMinusToggle)
     {
         toggleState = 1;
-        sendChangeMessage();
     }
     else if (button == &minusToggle)
     {
         toggleState = 2;
-        sendChangeMessage();
     }
+    vts.getParameter(buttonID)->beginChangeGesture();
+    vts.getParameter(buttonID)->setValueNotifyingHost(0.5f * (float)toggleState);
+    vts.getParameter(buttonID)->endChangeGesture();
+    DBG("Toggle State " + String((float)toggleState));
+    DBG("VTS Value " + std::to_string(vts.getRawParameterValue(buttonID)->load()));
+    sendChangeMessage();
 }
 
 void RandomnessDial::updateText()

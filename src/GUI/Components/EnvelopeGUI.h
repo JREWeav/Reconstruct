@@ -21,6 +21,9 @@ public:
 
     void calculatePoints();
 
+    void updateVTS();
+    void recallVTS();
+
     // Getters
     bool getCollapseState();
     int getEnvelopeType();
@@ -64,6 +67,10 @@ private:
     Point releasePoint;
 
     Point *selectedPoint;
+
+    bool firstCall;
+
+    AudioProcessorValueTreeState &vts;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EnvelopeGUI)
 };

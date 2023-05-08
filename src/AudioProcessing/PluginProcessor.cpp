@@ -179,17 +179,22 @@ AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createP
 
     // Grain Randomization
     params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_VOLUME_RANDOMNESS", "Grain Volume Randomization", 0, 100, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_VOLUME_DIRECTION", "Grain Volume Direction", 0, 2, 1));
     params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_LENGTH_RANDOMNESS", "Grain Length Randomization", 0, 500, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_LENGTH_DIRECTION", "Grain Length Direction", 0, 2, 1));
     params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_SPEED_RANDOMNESS", "Grain Speed Randomization", 0, 300, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_SPEED_DIRECTION", "Grain Speed Direction", 0, 2, 1));
     params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_PAN_RANDOMNESS", "Grain Pan Randomization", 0, 100, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_PAN_DIRECTION", "Grain Pan Direction", 0, 2, 1));
 
     // Grain Envelope
     StringArray envelopeTypes = {"ADSR", "ASR", "Hamming", "Hann", "Blackman", "White Noise"};
     params.push_back(std::make_unique<AudioParameterChoice>("ENVELOPE_TYPE", "Envelope Type", envelopeTypes, 0));
-    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_ATTACK", "Grain Attack", 0, 100, 0));
-    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_DECAY", "Grain Decay", 0, 100, 0));
-    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_SUSTAIN", "Grain Sustain", 0, 100, 100));
-    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_RELEASE", "Grain Release", 0, 100, 0));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_ATTACK", "Grain Attack", 0.0f, 1.0f, 0.2f));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_PEAK", "Grain Peak", 0.0f, 1.0f, 1.0f));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_DECAY", "Grain Decay", 0.0f, 1.0f, 0.2f));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_SUSTAIN", "Grain Sustain", 0.0f, 1.0f, 0.5f));
+    params.push_back(std::make_unique<AudioParameterFloat>("GRAIN_RELEASE", "Grain Release", 0.0f, 1.0f, 0.2f));
 
     return {params.begin(), params.end()};
 }

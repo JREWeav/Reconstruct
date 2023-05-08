@@ -1,21 +1,17 @@
 #include "EnvelopeGUI.h"
 
-EnvelopeGUI::EnvelopeGUI(AudioProcessorValueTreeState &vts)
+EnvelopeGUI::EnvelopeGUI(AudioProcessorValueTreeState &vts) : vts(vts)
 {
     addAndMakeVisible(envelopeType);
     envelopeType.addListener(this);
     envelopeTypeAttachment = std::make_unique<AudioProcessorValueTreeState::ComboBoxAttachment>(vts, "ENVELOPE_TYPE", envelopeType);
     envelopeType.addItemList({"ADSR", "ASR", "Hamming", "Hann", "Blackman", "White Noise"}, 1);
     envelopeType.setSelectedId(vts.getRawParameterValue("ENVELOPE_TYPE")->load() + 1);
-
     envelope.type = envelopeType.getSelectedId();
-    envelope.attack = 0.2f;
-    envelope.peak = 1.0f;
-    envelope.decay = 0.2f;
-    envelope.sustain = 0.5f;
-    envelope.release = 0.2f;
 
+    firstCall = true;
     selectedPoint = nullptr;
+    recallVTS();
 }
 
 EnvelopeGUI::~EnvelopeGUI()
@@ -108,6 +104,11 @@ void EnvelopeGUI::calculatePoints()
 
 void EnvelopeGUI::comboBoxChanged(juce::ComboBox *comboBox)
 {
+    if (firstCall)
+    {
+        firstCall = false;
+        return;
+    }
     if (comboBox == &envelopeType)
     {
         if (envelopeType.getSelectedId() == 1)
@@ -125,8 +126,8 @@ void EnvelopeGUI::comboBoxChanged(juce::ComboBox *comboBox)
             envelope.release = 0.2f;
         }
         envelope.type = envelopeType.getSelectedId();
-        sendChangeMessage();
         repaint();
+        sendChangeMessage();
     }
 }
 
@@ -217,6 +218,41 @@ void EnvelopeGUI::mouseDrag(const juce::MouseEvent &event)
 void EnvelopeGUI::mouseUp(const juce::MouseEvent &event)
 {
     selectedPoint = nullptr;
+    updateVTS();
+}
+
+// Update VTS
+void EnvelopeGUI::updateVTS()
+{
+    // Update VTS with new values
+    vts.getParameter("GRAIN_ATTACK")->beginChangeGesture();
+    vts.getParameter("GRAIN_ATTACK")->setValueNotifyingHost(envelope.attack);
+    vts.getParameter("GRAIN_ATTACK")->endChangeGesture();
+
+    vts.getParameter("GRAIN_PEAK")->beginChangeGesture();
+    vts.getParameter("GRAIN_PEAK")->setValueNotifyingHost(envelope.peak);
+    vts.getParameter("GRAIN_PEAK")->endChangeGesture();
+
+    vts.getParameter("GRAIN_DECAY")->beginChangeGesture();
+    vts.getParameter("GRAIN_DECAY")->setValueNotifyingHost(envelope.decay);
+    vts.getParameter("GRAIN_DECAY")->endChangeGesture();
+
+    vts.getParameter("GRAIN_SUSTAIN")->beginChangeGesture();
+    vts.getParameter("GRAIN_SUSTAIN")->setValueNotifyingHost(envelope.sustain);
+    vts.getParameter("GRAIN_SUSTAIN")->endChangeGesture();
+
+    vts.getParameter("GRAIN_RELEASE")->beginChangeGesture();
+    vts.getParameter("GRAIN_RELEASE")->setValueNotifyingHost(envelope.release);
+    vts.getParameter("GRAIN_RELEASE")->endChangeGesture();
+}
+
+void EnvelopeGUI::recallVTS()
+{
+    envelope.attack = vts.getParameter("GRAIN_ATTACK")->getValue();
+    envelope.peak = vts.getParameter("GRAIN_PEAK")->getValue();
+    envelope.decay = vts.getParameter("GRAIN_DECAY")->getValue();
+    envelope.sustain = vts.getParameter("GRAIN_SUSTAIN")->getValue();
+    envelope.release = vts.getParameter("GRAIN_RELEASE")->getValue();
 }
 // Getters
 
