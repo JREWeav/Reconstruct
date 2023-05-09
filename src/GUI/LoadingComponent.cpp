@@ -140,7 +140,7 @@ void LoadingComponent::changeListenerCallback(ChangeBroadcaster *source)
             float grainCurrentPosition = std::get<0>(grainParameters[i]);
             float grainVolume = std::get<1>(grainParameters[i]);
             float grainPan = std::get<2>(grainParameters[i]);
-            waveForm.addGrain(grainCurrentPosition, grainVolume, grainPan, juce::Colours::palegreen);
+            waveForm.addGrain(grainCurrentPosition, grainVolume, grainPan, juce::Colours::skyblue);
         }
     }
 }
