@@ -31,7 +31,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
 
     // Grains per second
     addAndMakeVisible(grainDensitySlider);
-    grainDensitySlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
+    grainDensitySlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
     grainDensitySlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
     DBG("GRAIN_DENSITY" + indexOfSelf);
     grainDensityAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.granularVTS, "GRAIN_DENSITY" + indexOfSelf, grainDensitySlider);
@@ -49,7 +49,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
 
     // Grain parameters
     addAndMakeVisible(grainVolumeSlider);
-    grainVolumeSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
+    grainVolumeSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
     grainVolumeSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
     grainVolumeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.granularVTS, "GRAIN_VOLUME" + indexOfSelf, grainVolumeSlider);
     grainVolumeSlider.addListener(this);
@@ -65,7 +65,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     grainVolumeLabel.setJustificationType(juce::Justification::centred);
 
     addAndMakeVisible(grainLengthSlider);
-    grainLengthSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
+    grainLengthSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
     grainLengthSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
     grainLengthAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.granularVTS, "GRAIN_LENGTH" + indexOfSelf, grainLengthSlider);
     grainLengthSlider.addListener(this);
@@ -81,7 +81,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     grainLengthLabel.setJustificationType(juce::Justification::centred);
 
     addAndMakeVisible(grainSpeedSlider);
-    grainSpeedSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
+    grainSpeedSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
     grainSpeedSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
     grainSpeedAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.granularVTS, "GRAIN_SPEED" + indexOfSelf, grainSpeedSlider);
     grainSpeedSlider.addListener(this);
@@ -97,7 +97,7 @@ MainGUI::MainGUI(AudioFormatManager &formatManager, AudioThumbnailCache &thumbna
     grainSpeedLabel.setJustificationType(juce::Justification::centred);
 
     addAndMakeVisible(grainPanSlider);
-    grainPanSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
+    grainPanSlider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
     grainPanSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
     grainPanAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(engine.granularVTS, "GRAIN_PAN" + indexOfSelf, grainPanSlider);
     grainPanSlider.addListener(this);
@@ -197,10 +197,10 @@ void MainGUI::resized()
     grainPanSlider.setBounds(getW * 20, getH * 1, getW * 3, getH * 3);
 
     // Grain Randomization
-    grainVolumeRandomnessSlider.setBounds(getW * 8, getH * 6, getW * 3, getH * 4);
-    grainLengthRandomnessSlider.setBounds(getW * 12, getH * 6, getW * 3, getH * 4);
-    grainSpeedRandomnessSlider.setBounds(getW * 16, getH * 6, getW * 3, getH * 4);
-    grainPanRandomnessSlider.setBounds(getW * 20, getH * 6, getW * 3, getH * 4);
+    grainVolumeRandomnessSlider.setBounds(getW * 8, getH * 6, getW * 3, getH * 5);
+    grainLengthRandomnessSlider.setBounds(getW * 12, getH * 6, getW * 3, getH * 5);
+    grainSpeedRandomnessSlider.setBounds(getW * 16, getH * 6, getW * 3, getH * 5);
+    grainPanRandomnessSlider.setBounds(getW * 20, getH * 6, getW * 3, getH * 5);
 
     // Envelope
     if (envelope.getCollapseState())

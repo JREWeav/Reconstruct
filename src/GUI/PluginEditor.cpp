@@ -33,6 +33,6 @@ void AudioPluginAudioProcessorEditor::paint(juce::Graphics &g)
 void AudioPluginAudioProcessorEditor::resized()
 {
     loadComponent.setBounds(0, 0, getWidth(), getHeight() / 2);
-    mainComponent1.setBounds(0, getHeight() / 2, getWidth() / 2, getHeight() / 2);
-    mainComponent2.setBounds(getWidth() / 2, getHeight() / 2, getWidth() / 2, getHeight() / 2);
+    mainComponent1.setBounds(0, getHeight() / 2 - 10, getWidth() / 2, getHeight() / 2);
+    mainComponent2.setBounds(getWidth() / 2, getHeight() / 2 - 10, getWidth() / 2, getHeight() / 2);
 }

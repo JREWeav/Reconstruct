@@ -6,7 +6,7 @@ RandomnessDial::RandomnessDial(AudioProcessorValueTreeState &_vts, juce::String 
 {
     DBG(sliderID);
     addAndMakeVisible(slider);
-    slider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalDrag);
+    slider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
     slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 100, 20);
     attachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(vts, sliderID, slider);
     slider.setNumDecimalPlacesToDisplay(0);
@@ -15,6 +15,7 @@ RandomnessDial::RandomnessDial(AudioProcessorValueTreeState &_vts, juce::String 
     addAndMakeVisible(plusToggle);
     plusToggle.setButtonText("+");
     plusToggle.setRadioGroupId(1000);
+    plusToggle.changeWidthToFitText();
     plusToggle.addListener(this);
     addAndMakeVisible(plusMinusToggle);
     plusMinusToggle.setButtonText("+/-");
@@ -54,7 +55,7 @@ void RandomnessDial::paint(Graphics &g)
 void RandomnessDial::resized()
 {
     auto getW = getWidth() / 3;
-    auto getH = getHeight() / 4;
+    auto getH = getHeight() / 5;
     slider.setBounds(0, 0, getW * 3, getH * 3);
     plusToggle.setBounds(0, getH * 3, getW, getH);
     plusMinusToggle.setBounds(getW, getH * 3, getW, getH);

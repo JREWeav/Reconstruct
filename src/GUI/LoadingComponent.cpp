@@ -93,24 +93,23 @@ void LoadingComponent::changeListenerCallback(ChangeBroadcaster *source)
 {
     if (source == &waveForm)
     {
-        waveForm.setRelativePosition(waveForm.getLastRelativeClick());
         if (waveForm.isLooping())
         {
+            loopStartSlider.setValue(waveForm.getLastRelativeClick());
+            loopEndSlider.setValue(waveForm.getLastRelativeClick() + waveForm.getRelativeLoopLength());
             engines[0].setRelativeSampleStart((float)waveForm.getLastRelativeClick());
             engines[1].setRelativeSampleStart((float)waveForm.getLastRelativeClick());
             engines[0].setRelativeSampleEnd((float)waveForm.getLastRelativeClick() + (float)waveForm.getRelativeLoopLength());
             engines[1].setRelativeSampleEnd((float)waveForm.getLastRelativeClick() + (float)waveForm.getRelativeLoopLength());
-            loopStartSlider.setValue(waveForm.getLastRelativeClick());
-            loopEndSlider.setValue(waveForm.getLastRelativeClick() + waveForm.getRelativeLoopLength());
         }
         else
         {
             engines[0].setRelativeSampleStart((float)waveForm.getLastRelativeClick());
             engines[1].setRelativeSampleStart((float)waveForm.getLastRelativeClick());
             engines[0].setRelativeSampleEnd((float)waveForm.getLastRelativeClick());
-            engines[1].setRelativeSampleStart((float)waveForm.getLastRelativeClick());
+            engines[1].setRelativeSampleEnd((float)waveForm.getLastRelativeClick());
             loopStartSlider.setValue(waveForm.getLastRelativeClick());
-            loopEndSlider.setValue(waveForm.getLastRelativeClick());
+            loopEndSlider.setValue(loopStartSlider.getValue());
         }
     }
     if (source == &engines[0])

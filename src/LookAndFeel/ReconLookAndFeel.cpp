@@ -196,3 +196,29 @@ void ReconLookAndFeel::drawButtonBackground(Graphics &g, Button &button, const C
 
     g.fillRect(bounds);
 }
+
+void ReconLookAndFeel::drawToggleButton(Graphics &g, ToggleButton &button,
+                                        bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+{
+    // Modified Juce Code
+    auto fontSize = jmin(14.0f, (float)button.getHeight() * 0.75f);
+    auto tickWidth = fontSize * 1.1f;
+
+    float tickX = button.getWidth() / 2 - tickWidth / 2;
+    drawTickBox(g, button, tickX, 4.0f,
+                tickWidth, tickWidth,
+                button.getToggleState(),
+                button.isEnabled(),
+                shouldDrawButtonAsHighlighted,
+                shouldDrawButtonAsDown);
+
+    g.setColour(button.findColour(ToggleButton::textColourId));
+    g.setFont(fontSize);
+
+    if (!button.isEnabled())
+        g.setOpacity(0.5f);
+
+    g.drawText(button.getButtonText(),
+               button.getLocalBounds().getBottomLeft().getX(), button.getLocalBounds().getBottomLeft().getY() - button.getHeight() / 2 + 2, button.getWidth(), 15,
+               Justification::centred);
+}

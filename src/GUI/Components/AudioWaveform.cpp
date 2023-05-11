@@ -151,6 +151,9 @@ void AudioWaveform::mouseDown(const MouseEvent &event)
     {
         looping = false;
         lastRelativeClick = (double)event.getMouseDownX() / (double)getWidth();
+        curPos = lastRelativeClick;
+        loopRelativeLength = 0.0f;
+        repaint();
         sendChangeMessage();
     }
 }
