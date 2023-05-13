@@ -51,9 +51,8 @@ public:
 
 private:
     //==============================================================================
-
     AudioFormatManager formatManager;
     GranularEngine granularEngines[2];
-    const int numVoices = 100;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
 };

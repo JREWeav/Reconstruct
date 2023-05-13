@@ -25,8 +25,7 @@ private:
     ToggleButton onOffButton;
     Label onOffLabel;
 
-    // Look and feel
-    const int numVoices = 8;
+    // Misc
     URL audioURL;
     GranularEngine &engine;
 

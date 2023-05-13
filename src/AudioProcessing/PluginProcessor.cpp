@@ -181,7 +181,7 @@ AudioProcessorValueTreeState::ParameterLayout AudioPluginAudioProcessor::createG
         "GRAIN_VOLUME" + indexString, "Grain Volume " + indexString, 0, 100, 50));
 
     params.push_back(std::make_unique<AudioParameterFloat>(
-        "GRAIN_LENGTH" + indexString, "Grain Length " + indexString, 20, 500, 100));
+        "GRAIN_LENGTH" + indexString, "Grain Length " + indexString, 1, 500, 100));
 
     params.push_back(std::make_unique<AudioParameterFloat>(
         "GRAIN_SPEED" + indexString, "Grain Speed " + indexString, 1, 500, 100));

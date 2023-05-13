@@ -98,16 +98,19 @@ private:
     bool engineOn;
     // Grain pool
     std::vector<Grain *> grainPool;
+
+    // Misc
     juce::AudioFormatManager &formatManager;
     std::unique_ptr<AudioSampleBuffer> sampleBuffer;
     float storedSampleRate;
     int processedSamples;
     int storedBufferSize;
-
     bool fileLoaded;
 
+    // Random number generator
     Random random;
 
+    // Midi note number of held notes
     std::vector<MidiMessage> heldNotes;
 
     // Sample parameters

@@ -11,9 +11,10 @@ public:
     // Start Position
     void setGrainStartPosition(float position);
     void setGrainSampleRate(float sampleRate);
-    void setGrainLoop(bool loop);
-    void setGrainPitch(float pitch);
     void setGrainOffsetInSamples(int offsetInSamples);
+
+    // Grain Pitch From Midi
+    void setGrainPitch(float pitch);
 
     // Grain Params
     void setGrainLengthInMs(int length);
@@ -21,17 +22,12 @@ public:
     void setGrainSpeed(float speed);
     void setGrainPan(float pan);
 
-    // Randomness
-    void setGrainRandomLength(bool randomLength);
-    void setGrainRandomPosition(bool randomPosition);
-    void setGrainRandomSpeed(bool randomSpeed);
-    void setGrainRandomPan(bool randomPan);
-
-    // Reverse
-    void setGrainReverse(bool reverse);
+    // Reverse #TODO
+    // void setGrainReverse(bool reverse);
 
     // Getters
-    float getGrainLengthInMs();
+    float
+    getGrainLengthInMs();
     float getGrainPitch();
     int getGrainPlaybackPositionInSamples();
     int getGrainLengthInSamples();

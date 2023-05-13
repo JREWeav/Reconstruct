@@ -34,13 +34,13 @@ void Grain::initGrain(AudioSampleBuffer *sampleBuffer, int type, float attack, f
 {
     const int numSamples = sampleBuffer->getNumSamples();
 
-    // Setting a max pitch of 4000Hz so that the grain doesn't get too high pitched or skipped entirely
-    const float maxPitch = 4000.0f;
+    // Setting a max pitch of 20000Hz so that the grain doesn't get too high pitched or skipped entirely
+    const float maxPitch = 20000.0f;
     grainPlaybackRate = jmin(grainPitch / 261.62, maxPitch / 261.62);
     float grainSpeedInFloat = grainSpeed / 100.0f;
     grainPlaybackRate *= grainSpeedInFloat;
 
-    // grainLengthInSamples = (int)ceil((grainSampleRate * (grainLengthInMs / 1000.0f)) * grainPlaybackRate);
+    // Initialise Grain parameters
     grainLengthInSamples = (int)ceil((grainSampleRate * (grainLengthInMs / 1000.0f)));
     grainStartPositionInSamples = (int)ceil(grainStartPosition * numSamples);
     grainStartPositionInSamples = jmax(grainStartPositionInSamples, 1);
@@ -48,6 +48,7 @@ void Grain::initGrain(AudioSampleBuffer *sampleBuffer, int type, float attack, f
     grainEndPositionInSamples = jmin(grainEndPositionInSamples, numSamples);
     grainLengthInSamples = grainEndPositionInSamples - grainStartPositionInSamples;
 
+    // Initialise envelope
     generateEnvelope(type, attack, peak, decay, sustain, release, grainLengthInSamples);
 }
 
@@ -58,6 +59,7 @@ void Grain::updateGrain(int numSamples, AudioSampleBuffer &audioBlock, AudioSamp
     grainCurrentRelativePosition = (float)(grainStartPositionInSamples + grainPlaybackPositionInSamples) / (float)samplesTotalSamples;
     grainCurrentVolume = grainVolumeInFloat * grainEnvelope[grainPlaybackPositionInSamples];
 
+    // Calculate the amount of samples to play back
     int playbackAmount = grainLengthInSamples - grainPlaybackPositionInSamples;
     playbackAmount = jmin(playbackAmount, numSamples);
 
@@ -95,7 +97,7 @@ void Grain::updateGrain(int numSamples, AudioSampleBuffer &audioBlock, AudioSamp
             if (positionInInt - 1 < 0 || positionInInt + 2 >= samplesTotalSamples)
                 continue;
 
-            // Cubic interpolation
+            // Cubic interpolation to get the next sample
             float y0 = sampleData[positionInInt];
             float y1 = sampleData[positionInInt + 1];
             float y2 = sampleData[positionInInt + 2];
@@ -103,7 +105,7 @@ void Grain::updateGrain(int numSamples, AudioSampleBuffer &audioBlock, AudioSamp
 
             float nextSample = cubicInterpolation(remainder, y0, y1, y2, y3);
 
-            // Panning
+            // Apply Panning
             float grainPanInFloat = grainPan / 100.0f;
             float grainPanL = sqrt(1.0f - grainPanInFloat);
             float grainPanR = sqrt(grainPanInFloat);
@@ -113,10 +115,9 @@ void Grain::updateGrain(int numSamples, AudioSampleBuffer &audioBlock, AudioSamp
                 if (channel == 0)
                     nextSample *= grainPanL;
                 else if (channel == 1)
-                {
                     nextSample *= grainPanR;
-                }
             }
+            // Add the sample to the output buffer
             if (!offsetComplete)
             {
                 outputData[i + grainOffsetInSamples] += (nextSample * grainEnvelope[grainPlaybackPositionInSamples + i] * grainVolumeInFloat);
@@ -174,10 +175,31 @@ void Grain::generateEnvelope(int type, float attack, float peak, float decay, fl
 
 // Setters
 
+// Grain Playback params
+
 void Grain::setGrainSampleRate(float sampleRate)
 {
     grainSampleRate = sampleRate;
 }
+
+void Grain::setGrainStartPosition(float position)
+{
+    grainStartPosition = position;
+}
+
+void Grain::setGrainOffsetInSamples(int offset)
+{
+    grainOffsetInSamples = offset;
+}
+
+// Grain Pitch from MIDI note
+
+void Grain::setGrainPitch(float _pitch)
+{
+    grainPitch = _pitch;
+}
+
+// Grain params
 
 void Grain::setGrainLengthInMs(int length)
 {
@@ -189,49 +211,9 @@ void Grain::setGrainVolume(float volume)
     grainVolume = volume;
 }
 
-void Grain::setGrainStartPosition(float position)
-{
-    grainStartPosition = position;
-}
-
 void Grain::setGrainSpeed(float speed)
 {
     grainSpeed = speed;
-}
-
-void Grain::setGrainPitch(float pitch)
-{
-    grainPitch = pitch;
-}
-
-void Grain::setGrainLoop(bool loop)
-{
-    grainLoop = loop;
-}
-
-void Grain::setGrainOffsetInSamples(int offset)
-{
-    grainOffsetInSamples = offset;
-}
-
-void Grain::setGrainReverse(bool reverse)
-{
-    grainReverse = reverse;
-}
-
-void Grain::setGrainRandomLength(bool randomLength)
-{
-    grainRandomLength = randomLength;
-}
-
-void Grain::setGrainRandomPosition(bool randomPosition)
-{
-    grainRandomPosition = randomPosition;
-}
-
-void Grain::setGrainRandomSpeed(bool randomSpeed)
-{
-    grainRandomSpeed = randomSpeed;
 }
 
 void Grain::setGrainPan(float pan)
