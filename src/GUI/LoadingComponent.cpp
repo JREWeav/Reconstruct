@@ -47,6 +47,12 @@ LoadingComponent::LoadingComponent(AudioFormatManager &formatManager, AudioThumb
 
 LoadingComponent::~LoadingComponent()
 {
+    engines->globalVTS.getParameter("SAMPLE_START")->beginChangeGesture();
+    engines->globalVTS.getParameter("SAMPLE_START")->setValueNotifyingHost(waveForm.getLastRelativeClick());
+    engines->globalVTS.getParameter("SAMPLE_START")->endChangeGesture();
+    engines->globalVTS.getParameter("SAMPLE_END")->beginChangeGesture();
+    engines->globalVTS.getParameter("SAMPLE_END")->setValueNotifyingHost(waveForm.getLastRelativeClick() + waveForm.getRelativeLoopLength());
+    engines->globalVTS.getParameter("SAMPLE_END")->endChangeGesture();
     engines[0].removeChangeListener(this);
     engines[1].removeChangeListener(this);
     waveForm.removeChangeListener(this);
