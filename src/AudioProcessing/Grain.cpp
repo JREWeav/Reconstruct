@@ -132,7 +132,7 @@ void Grain::updateGrain(int numSamples, AudioSampleBuffer &audioBlock, AudioSamp
     grainPlaybackPositionInSamples += playbackAmount;
 }
 
-// Cubic interpolation
+// Cubic interpolation - Equation from http://paulbourke.net/miscellaneous/interpolation/
 
 float Grain::cubicInterpolation(float x, float y0, float y1, float y2, float y3)
 {
